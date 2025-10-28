@@ -34,29 +34,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await loadProfile(session.user.id);
+    // Attempt to read session in a v2-compatible way and fall back if needed
+    (async () => {
+      try {
+        // supabase.auth.getSession() returns { data: { session }, error } in v2
+        const maybe = await (supabase.auth as any).getSession?.()
+        if (maybe && maybe.data) {
+          const { session } = maybe.data
+          setSession(session)
+          setUser(session?.user ?? null)
+          if (session?.user) {
+            await loadProfile(session.user.id)
+          } else {
+            setLoading(false)
+          }
         } else {
-          setProfile(null);
+          // fallback for older SDKs or unexpected shapes
+          const fallback = (supabase.auth as any).session?.()
+          const s = fallback?.user ? fallback : null
+          setSession(s)
+          setUser(s?.user ?? null)
+          if (s?.user) {
+            await loadProfile(s.user.id)
+          } else {
+            setLoading(false)
+          }
         }
-      })();
-    });
+      } catch (err) {
+        console.warn('Could not get session from supabase client', err)
+        setLoading(false)
+      }
+    })()
 
-    return () => subscription.unsubscribe();
+    // Subscribe to auth state changes. v2 returns { data: { subscription } }
+    const sub = (supabase.auth as any).onAuthStateChange?.((_event: any, session: any) => {
+      (async () => {
+        setSession(session)
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          await loadProfile(session.user.id)
+        } else {
+          setProfile(null)
+        }
+      })()
+    })
+
+    // If v2 shape, sub.data.subscription exists
+    try {
+      if (sub && sub.data && sub.data.subscription) {
+        return () => sub.data.subscription.unsubscribe()
+      }
+    } catch (e) {
+      // otherwise try to unsubscribe if function returned
+      if (sub && typeof sub === 'function') return sub
+    }
+    return () => {}
   }, []);
 
   const loadProfile = async (userId: string) => {
