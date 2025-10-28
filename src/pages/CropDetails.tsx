@@ -9,7 +9,22 @@ export default function CropDetails() {
   const { cropName } = useParams<{ cropName: string }>();
   const navigate = useNavigate();
 
-  const cropData: {[key: string]: any} = {
+  type CropInfo = {
+    name: string;
+    image: string;
+    description: string;
+    season: string;
+    duration: string;
+    finance: { investment: string; returns: string; breakeven: string };
+    land: { type: string; preparation: string; spacing: string };
+    water: { requirement: string; irrigation: string; critical: string };
+    nursery: { seeds: string; treatment: string; source: string };
+    fertilizers: { basal: string; top: string; organic: string };
+    transport: { harvest: string; storage: string; market: string };
+    market: { msp: string; demand: string; buyers: string };
+  };
+
+  const cropData: { [key: string]: CropInfo } = {
     rice: {
       name: 'Rice',
       image: 'https://images.pexels.com/photos/4110256/pexels-photo-4110256.jpeg',

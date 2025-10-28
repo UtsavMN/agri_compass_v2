@@ -57,10 +57,11 @@ export default function MarketPrices() {
 
       const uniqueLocations = [...new Set(data?.map(p => p.location) || [])];
       setLocations(uniqueLocations);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error loading market prices',
-        description: error.message,
+        description: err.message ?? 'Failed to load market prices',
         variant: 'destructive',
       });
     } finally {

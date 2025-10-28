@@ -46,10 +46,11 @@ export default function GovSchemes() {
 
       if (error) throw error;
       setSchemes(data || []);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error loading schemes',
-        description: error.message,
+        description: err.message ?? 'Failed to load schemes',
         variant: 'destructive',
       });
     } finally {

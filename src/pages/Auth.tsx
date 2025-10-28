@@ -29,10 +29,11 @@ export default function Auth() {
         description: 'You have successfully signed in.',
       });
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Sign in failed',
-        description: error.message || 'Invalid email or password',
+        description: err.message || 'Invalid email or password',
         variant: 'destructive',
       });
     } finally {
@@ -51,10 +52,11 @@ export default function Auth() {
         description: 'Welcome to Agri Compass. You can now sign in.',
       });
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Sign up failed',
-        description: error.message || 'Could not create account',
+        description: err.message || 'Could not create account',
         variant: 'destructive',
       });
     } finally {

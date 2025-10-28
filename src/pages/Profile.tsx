@@ -43,10 +43,11 @@ export default function Profile() {
         title: 'Profile updated!',
         description: 'Your profile has been successfully updated.',
       });
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error updating profile',
-        description: error.message,
+        description: err.message ?? 'Failed to update profile',
         variant: 'destructive',
       });
     } finally {

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Sprout, MapPin, Ruler, Droplet, Edit, Trash2 } from 'lucide-react';
+import { Plus, Sprout, MapPin, Ruler, Droplet, Trash2 } from 'lucide-react';
 
 interface Farm {
   id: string;
@@ -51,10 +51,11 @@ export default function MyFarms() {
 
       if (error) throw error;
       setFarms(data || []);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error loading farms',
-        description: error.message,
+        description: err.message ?? 'Failed to load farms',
         variant: 'destructive',
       });
     } finally {
@@ -93,10 +94,11 @@ export default function MyFarms() {
         irrigation_type: '',
       });
       loadFarms();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error adding farm',
-        description: error.message,
+        description: err.message ?? 'Failed to add farm',
         variant: 'destructive',
       });
     }
@@ -115,10 +117,11 @@ export default function MyFarms() {
         description: 'Your farm has been removed.',
       });
       loadFarms();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error deleting farm',
-        description: error.message,
+        description: err.message ?? 'Failed to delete farm',
         variant: 'destructive',
       });
     }

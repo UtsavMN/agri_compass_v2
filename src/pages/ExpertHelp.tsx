@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -98,10 +98,11 @@ export default function ExpertHelp() {
 
       if (error) throw error;
       setQuestions(data || []);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error loading questions',
-        description: error.message,
+        description: err.message ?? 'Failed to load questions',
         variant: 'destructive',
       });
     } finally {
@@ -141,10 +142,11 @@ export default function ExpertHelp() {
       setDialogOpen(false);
       setFormData({ title: '', question: '', category: '' });
       loadQuestions();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error posting question',
-        description: error.message,
+        description: err.message ?? 'Failed to post question',
         variant: 'destructive',
       });
     }
@@ -182,10 +184,11 @@ export default function ExpertHelp() {
       setAnswerText('');
       setSelectedQuestion(null);
       loadQuestions();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error posting answer',
-        description: error.message,
+        description: err.message ?? 'Failed to post answer',
         variant: 'destructive',
       });
     }

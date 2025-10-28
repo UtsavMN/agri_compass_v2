@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Heart, MessageCircle, User, Search } from 'lucide-react';
+import { Plus, Heart, MessageCircle, Search } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -78,10 +78,11 @@ export default function Community() {
 
       if (error) throw error;
       setPosts(data || []);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error loading posts',
-        description: error.message,
+        description: err.message ?? 'Failed to load posts',
         variant: 'destructive',
       });
     } finally {
@@ -139,10 +140,11 @@ export default function Community() {
       setDialogOpen(false);
       setFormData({ title: '', content: '', category: '' });
       loadPosts();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error creating post',
-        description: error.message,
+        description: err.message ?? 'Failed to create post',
         variant: 'destructive',
       });
     }
@@ -178,10 +180,11 @@ export default function Community() {
       }
 
       loadPosts();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       toast({
         title: 'Error',
-        description: error.message,
+        description: err.message ?? 'Action failed',
         variant: 'destructive',
       });
     }
