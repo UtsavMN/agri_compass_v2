@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Layout from '@/components/Layout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { ChatMessage as ProviderMessage, getChatbotProvider } from '@/lib/chatbot';
 
 type ChatMessage = {
   id: string;
@@ -40,11 +41,6 @@ export default function Chat() {
     }
   }, [messages]);
 
-  const placeholderReply = useMemo(() => (
-    'I am your farming assistant. Ask about crop practices, pest control, irrigation, fertilizer schedules, or how to use the app. '
-    + 'Example: "Best irrigation schedule for tomato in Kharif?"'
-  ), []);
-
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -59,12 +55,16 @@ export default function Chat() {
     setInput('');
 
     try {
-      // Mock assistant response for now. Replace with backend call later.
-      await new Promise((r) => setTimeout(r, 500));
+      const provider = getChatbotProvider();
+      const history: ProviderMessage[] = [...messages, userMsg].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+      const answer = await provider.sendMessage(history);
       const assistantMsg: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: placeholderReply,
+        content: answer,
         createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, assistantMsg]);

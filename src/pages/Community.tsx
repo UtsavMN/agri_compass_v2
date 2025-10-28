@@ -56,14 +56,17 @@ export default function Community() {
   ];
 
   useEffect(() => {
-    loadPosts();
+    void loadPosts();
   }, []);
 
   useEffect(() => {
     filterPosts();
   }, [searchTerm, categoryFilter, posts]);
 
-  const loadPosts = async () => {
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  const loadPosts = async (nextPage = 1) => {
     try {
       const { data, error } = await supabase
         .from('community_posts')
@@ -74,10 +77,16 @@ export default function Community() {
             full_name
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range((nextPage - 1) * PAGE_SIZE, nextPage * PAGE_SIZE - 1);
 
       if (error) throw error;
-      setPosts(data || []);
+      if (nextPage === 1) {
+        setPosts(data || []);
+      } else {
+        setPosts((prev) => [...prev, ...(data || [])]);
+      }
+      setPage(nextPage);
     } catch (error) {
       const err = error as { message?: string };
       toast({
@@ -139,7 +148,7 @@ export default function Community() {
 
       setDialogOpen(false);
       setFormData({ title: '', content: '', category: '' });
-      loadPosts();
+      void loadPosts(1);
     } catch (error) {
       const err = error as { message?: string };
       toast({
@@ -179,7 +188,7 @@ export default function Community() {
         }
       }
 
-      loadPosts();
+      void loadPosts(1);
     } catch (error) {
       const err = error as { message?: string };
       toast({
@@ -188,6 +197,11 @@ export default function Community() {
         variant: 'destructive',
       });
     }
+  };
+
+  const loadMore = async () => {
+    setLoading(true);
+    await loadPosts(page + 1);
   };
 
   const formatDate = (dateString: string) => {
@@ -381,6 +395,11 @@ export default function Community() {
                 </CardContent>
               </Card>
             ))}
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" onClick={loadMore} disabled={loading}>
+                {loading ? 'Loading…' : 'Load more'}
+              </Button>
+            </div>
           </div>
         )}
       </div>
