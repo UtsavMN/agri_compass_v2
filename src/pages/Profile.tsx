@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,7 @@ export default function Profile() {
   const { user, profile, updateProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     full_name: '',
@@ -20,6 +22,17 @@ export default function Profile() {
     location: '',
     language_preference: 'en',
   });
+  const [posts, setPosts] = useState<Array<{
+    id: string;
+    title: string;
+    content: string;
+    category: string;
+    created_at: string;
+    likes_count: number;
+    comments_count: number;
+  }>>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 9;
 
   useEffect(() => {
     if (profile) {
@@ -32,6 +45,35 @@ export default function Profile() {
       });
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (user?.id) {
+      void loadUserPosts(1);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const loadUserPosts = async (nextPage: number) => {
+    if (!user?.id) return;
+    setLoadingPosts(true);
+    try {
+      const { data, error } = await supabase
+        .from('community_posts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .range((nextPage - 1) * PAGE_SIZE, nextPage * PAGE_SIZE - 1);
+      if (error) throw error;
+      if (nextPage === 1) setPosts(data || []);
+      else setPosts((prev) => [...prev, ...(data || [])]);
+      setPage(nextPage);
+    } catch (error) {
+      const err = error as { message?: string };
+      toast({ title: 'Error loading posts', description: err.message ?? 'Failed to load', variant: 'destructive' });
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +117,7 @@ export default function Profile() {
           <p className="text-gray-600 mt-2">Manage your account information</p>
         </div>
 
-        <Card>
+      <Card>
           <CardHeader>
             <CardTitle>Personal Information</CardTitle>
             <CardDescription>Update your profile details</CardDescription>
@@ -184,6 +226,40 @@ export default function Profile() {
             </form>
           </CardContent>
         </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>My Posts</CardTitle>
+          <CardDescription>Your recent community posts</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingPosts && posts.length === 0 ? (
+            <div className="text-sm text-gray-500">Loading posts…</div>
+          ) : posts.length === 0 ? (
+            <div className="text-sm text-gray-500">You have not posted yet.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {posts.map((p) => (
+                <Card key={p.id} className="border-green-100">
+                  <CardHeader>
+                    <CardTitle className="text-base">{p.title}</CardTitle>
+                    <CardDescription>{new Date(p.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-700 line-clamp-3 whitespace-pre-wrap">{p.content}</p>
+                    <div className="text-xs text-gray-500 mt-2">{p.category} • {p.likes_count} likes • {p.comments_count} comments</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          <div className="flex justify-center pt-4">
+            <Button variant="outline" onClick={() => loadUserPosts(page + 1)} disabled={loadingPosts}>
+              {loadingPosts ? 'Loading…' : 'Load more'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       </div>
     </Layout>
   );
