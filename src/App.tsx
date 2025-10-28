@@ -12,6 +12,7 @@ import Community from '@/pages/Community';
 import ExpertHelp from '@/pages/ExpertHelp';
 import Weather from '@/pages/Weather';
 import Profile from '@/pages/Profile';
+import Chat from '@/pages/Chat';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/expert-help" element={<ExpertHelp />} />
           <Route path="/weather" element={<Weather />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/chat" element={<Chat />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
