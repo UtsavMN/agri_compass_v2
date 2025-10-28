@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+# Treat common binary types
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+
+# Keep lockfiles with LF
+package-lock.json text eol=lf
+
+# Normalize shell/batch scripts
+*.sh text eol=lf
+*.ps1 text eol=lf
+
+# Ensure consistent type definitions
+*.d.ts text eol=lf
+
