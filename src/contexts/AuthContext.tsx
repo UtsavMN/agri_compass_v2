@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface Profile {
   id: string;
@@ -92,6 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loadProfile = async (userId: string) => {
+    if (!isSupabaseConfigured) {
+      // Supabase is not configured in this environment (dev). Avoid calling the
+      // client which returns stub errors; just clear loading and return early.
+      setLoading(false)
+      return
+    }
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -108,30 +114,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, username: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) {
+      throw new Error(
+        'Supabase not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local and restart the dev server.'
+      )
+    }
+    // Basic client-side email validation to provide a clearer error message
+    // before calling the Supabase API. This avoids confusing server messages
+    // and catches obvious formatting mistakes early.
+    const emailPattern = /\S+@\S+\.\S+/;
+    if (!email || !emailPattern.test(email)) {
+      throw new Error('Invalid email address');
+    }
+    // Create the user via Supabase Auth. We intentionally do NOT insert a
+    // profile here: the database migration already creates a trigger
+    // (on `auth.users`) which will insert a corresponding row into
+    // `public.profiles` server-side. Trying to insert a profile from the
+    // client during sign-up can fail because the user is not yet
+    // authenticated (anonymous/anon role) and Row Level Security blocks
+    // the insert. Letting the DB trigger handle profile creation avoids
+    // races and RLS violations.
+  const normalizedEmail = email.trim();
+  const { data, error } = await supabase.auth.signUp({ email: normalizedEmail, password });
 
     if (error) throw error;
 
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username,
-            language_preference: 'en',
-          },
-        ]);
-
-      if (profileError) throw profileError;
+    // If the SDK returns a session/user immediately, optionally load the
+    // profile. In many Supabase setups signUp requires email confirmation
+    // and the user won't be signed in right away.
+    if (data?.user?.id) {
+      try {
+        await loadProfile(data.user.id);
+      } catch (e) {
+        // Non-fatal: profile may be created asynchronously by the trigger.
+        console.warn('Profile load after signUp failed (expected in some flows):', e);
+      }
     }
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) {
+      throw new Error(
+        'Supabase not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local and restart the dev server.'
+      )
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -141,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured) return
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setProfile(null);

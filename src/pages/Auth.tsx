@@ -33,7 +33,9 @@ export default function Auth() {
       const err = error as { message?: string };
       toast({
         title: 'Sign in failed',
-        description: err.message || 'Invalid email or password',
+        description: err.message?.toLowerCase().includes('email not confirmed')
+          ? 'Please check your email and click the confirmation link before signing in.'
+          : err.message || 'Invalid email or password',
         variant: 'destructive',
       });
     } finally {
@@ -46,12 +48,11 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      await signUp(email, password, username);
+      await signUp(email, password);
       toast({
         title: 'Account created!',
-        description: 'Welcome to Agri Compass. You can now sign in.',
+        description: 'Check your email to confirm your account (if required). Then sign in.',
       });
-      navigate('/dashboard');
     } catch (error) {
       const err = error as { message?: string };
       toast({
