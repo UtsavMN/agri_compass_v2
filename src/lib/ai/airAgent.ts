@@ -1,14 +1,7 @@
-import OpenAI from 'openai';
+import type { ChatMessage } from '../chatbot';
+import { chatWithAI } from '../chatbot';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
+export type { ChatMessage };
 
 export class AirAgent {
   private systemPrompt = `You are KrishiMitra — an agriculture expert for Karnataka farmers.
@@ -18,21 +11,14 @@ Always provide actionable, farmer-friendly advice.`;
 
   async sendMessage(messages: ChatMessage[], district?: string): Promise<string> {
     try {
-      const contextMessages: ChatMessage[] = [
-        { role: 'system', content: this.systemPrompt + (district ? ` Current district context: ${district}` : '') },
-        ...messages
-      ];
-
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
-        messages: contextMessages,
-        max_tokens: 300,
-        temperature: 0.7,
-      });
-
-      return completion.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+      // Add system context to the user's message
+      const systemContext = this.systemPrompt + (district ? ` Current district context: ${district}` : '');
+      const userMessage = messages[messages.length - 1].content;
+      const contextualizedMessage = `${systemContext}\n\nUser question: ${userMessage}`;
+      
+      return await chatWithAI(contextualizedMessage);
     } catch (error) {
-      console.error('OpenAI API error:', error);
+      console.error('Chat API error:', error);
       return 'ಕ್ಷಮಿಸಿ, ಸದ್ಯಕ್ಕೆ ಸೇವೆ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.';
     }
   }

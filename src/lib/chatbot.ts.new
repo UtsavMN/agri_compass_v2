@@ -106,5 +106,3 @@ class ChatbotService {
 const chatbotService = new ChatbotService();
 export const chatWithAI = chatbotService.chatWithAI.bind(chatbotService);
 export const getChatbotProvider = chatbotService.getChatbotProvider.bind(chatbotService);
-
-
