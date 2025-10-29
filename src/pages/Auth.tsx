@@ -48,7 +48,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      await signUp(email, password);
+  await signUp(email, password);
       toast({
         title: 'Account created!',
         description: 'Check your email to confirm your account (if required). Then sign in.',

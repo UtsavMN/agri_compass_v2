@@ -1,82 +1,102 @@
-/**
- * System prompt for initializing the AI assistant
- */
-const SYSTEM_PROMPT = `You are an expert agricultural assistant helping farmers. 
-You have deep knowledge of:
-- Crop management and best practices
-- Pest and disease control
-- Weather patterns and climate adaptation
-- Market trends and pricing
-- Government schemes and policies
-- Sustainable farming methods
-- Modern farming technologies
-- Local agricultural conditions
-
-Keep responses:
-- Clear and simple
-- Practical and actionable 
-- Relevant to the farmer's context
-- Evidence-based when possible
-`;
-
 export type ChatMessage = {
   role: 'user' | 'assistant' | 'system';
   content: string;
 };
+
 export interface ChatbotProvider {
   name: string;
   sendMessage(messages: ChatMessage[]): Promise<string>;
 }
 
+// Default local provider (fallback) — kept for offline/dev usage
 class DefaultChatbotProvider implements ChatbotProvider {
   name = 'default';
 
   async sendMessage(messages: ChatMessage[]): Promise<string> {
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 600)); // Simulate API delay
 
     const last = messages[messages.length - 1];
     const message = last?.content ?? '';
 
-    // Simple response generation based on keywords
-    if (message.toLowerCase().includes('pest') || message.toLowerCase().includes('disease')) {
-      return `Here are some tips for pest and disease control:
-1. Regular monitoring of your crops
-2. Use of appropriate pesticides when necessary
-3. Maintain field hygiene
-4. Consider biological control methods
-5. Implement crop rotation
+    if (!message) return 'Please provide a question or prompt.';
 
-Would you like more specific information about any particular pest or disease?`;
+    // Simple rule-based responses for common topics
+    if (message.toLowerCase().includes('pest') || message.toLowerCase().includes('disease')) {
+      return `Here are some tips for pest and disease control:\n1. Regularly inspect your crops.\n2. Use targeted pesticides when necessary.\n3. Maintain field hygiene.\n4. Consider biological controls.\n5. Implement crop rotation.`;
     }
 
     if (message.toLowerCase().includes('weather') || message.toLowerCase().includes('rain')) {
-      return `Weather considerations for farming:
-1. Check local weather forecasts regularly
-2. Plan activities around weather patterns
-3. Have contingency plans for extreme weather
-4. Use weather-based irrigation scheduling
-5. Consider climate-resilient crop varieties
-
-Would you like specific weather-related farming advice?`;
+      return `Weather tips:\n1. Check forecasts often.\n2. Plan activities around predicted rain.\n3. Use weather-driven irrigation scheduling.`;
     }
 
     if (message.toLowerCase().includes('market') || message.toLowerCase().includes('price')) {
-      return `Market and pricing advice:
-1. Research current market trends
-2. Compare prices across different markets
-3. Consider storage options if prices are low
-4. Build relationships with reliable buyers
-5. Consider value addition opportunities
-
-Would you like more detailed market analysis for specific crops?`;
+      return `Market advice:\n1. Compare prices across nearby markets.\n2. Consider storage if prices are low.\n3. Build relationships with buyers.`;
     }
 
-    return `Thank you for your question. I'm here to help with any farming-related queries. Could you please provide more specific details about your question? \n\nI can assist with:\n- Crop management\n- Pest control\n- Disease management\n- Weather adaptation\n- Market information\n- Government schemes\n- Farming best practices`;
+    return `Thanks — please provide more details so I can help (crop name, location, or problem).`;
   }
 }
 
-// Initialize the default provider
-const provider = new DefaultChatbotProvider();
+// Provider that calls the external Gemini-like API configured via Vite env vars.
+class RemoteChatbotProvider implements ChatbotProvider {
+  name = 'remote';
+
+  apiUrl = (import.meta.env.VITE_GEMINI_API_URL as string) || '';
+  apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || '';
+
+  async sendMessage(messages: ChatMessage[]): Promise<string> {
+    if (!this.apiUrl || !this.apiKey) {
+      throw new Error('Remote chatbot provider not configured (VITE_GEMINI_API_URL/KEY)');
+    }
+
+    const payload = {
+      // Attempt a compatible shape for common completions endpoints.
+      model: 'gpt-like',
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      max_tokens: 800,
+      temperature: 0.6,
+    };
+
+    const res = await fetch(this.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Chat API error: ${res.status} ${txt}`);
+    }
+
+    const data = await res.json();
+
+    // Try to extract text from common response shapes
+    // OpenAI-compatible: data.choices[0].message.content
+    if (data?.choices && Array.isArray(data.choices) && data.choices.length) {
+      const ch = data.choices[0];
+      const content = ch?.message?.content ?? ch?.text ?? null;
+      if (content) return String(content);
+    }
+
+    // Some services return { result: '...' } or { output_text: '...' }
+    if (typeof data?.result === 'string') return data.result;
+    if (typeof data?.output_text === 'string') return data.output_text;
+
+    // As a last resort, stringify the body
+    return JSON.stringify(data);
+  }
+}
+
+// Choose provider: remote when configured, otherwise default
+let provider: ChatbotProvider;
+if (import.meta.env.VITE_GEMINI_API_URL && import.meta.env.VITE_GEMINI_API_KEY) {
+  provider = new RemoteChatbotProvider();
+} else {
+  provider = new DefaultChatbotProvider();
+}
 
 /**
  * Send a message to the AI chatbot and get a response

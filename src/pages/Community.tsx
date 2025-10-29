@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
+import { translateToKannada } from '@/lib/translator'
 import Layout from '@/components/Layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -14,10 +15,10 @@ import { useDropzone } from 'react-dropzone'
 export default function Community() {
   const { user } = useAuth()
   const { toast } = useToast()
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<any[]>([])
   const [newPostContent, setNewPostContent] = useState('')
   const [isCreatingPost, setIsCreatingPost] = useState(false)
-  const [mediaFiles, setMediaFiles] = useState([])
+  const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -25,7 +26,7 @@ export default function Community() {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
       'video/*': ['.mp4', '.webm']
     },
-    onDrop: (acceptedFiles) => {
+    onDrop: (acceptedFiles: File[]) => {
       setMediaFiles([...mediaFiles, ...acceptedFiles])
     }
   })
@@ -55,9 +56,10 @@ export default function Community() {
       setPosts(data)
     } catch (error) {
       console.error('Error fetching posts:', error)
+      const msg = (error as any)?.message ?? String(error)
       toast({
         title: 'Error fetching posts',
-        description: 'Please try again later',
+        description: msg || 'Please try again later',
         variant: 'destructive'
       })
     }
@@ -71,9 +73,9 @@ export default function Community() {
       // Upload media files if any
       const mediaUrls = []
       for (const file of mediaFiles) {
-        const fileExt = file.name.split('.').pop()
+        const fileExt = (file.name || '').split('.').pop()
         const fileName = `${Math.random()}${Date.now()}.${fileExt}`
-        const filePath = `${user.id}/${fileName}`
+        const filePath = `${user?.id}/${fileName}`
 
         const { error: uploadError } = await supabase.storage
           .from('post-media')
@@ -88,16 +90,46 @@ export default function Community() {
         mediaUrls.push(data.publicUrl)
       }
 
-      // Create post
-      const { error } = await supabase
-        .from('posts')
-        .insert({
-          user_id: user.id,
-          content: newPostContent,
-          images: mediaUrls
-        })
 
-      if (error) throw error
+      // Translate caption to Kannada (non-blocking if translator fails)
+      let knCaption = ''
+      try {
+        knCaption = await translateToKannada(newPostContent)
+      } catch (e) {
+        console.warn('Translation failed', e)
+      }
+
+      // Create post (includes Kannada caption). If the database doesn't
+      // have the `kn_caption` column yet, try again without it.
+      let insertError: any = null
+      try {
+        const { error } = await supabase.from('posts').insert({
+          user_id: user?.id,
+          content: newPostContent,
+          kn_caption: knCaption || null,
+          images: mediaUrls,
+        });
+        if (error) throw error;
+      } catch (err: any) {
+        insertError = err;
+        // Detect missing-column error (Postgres) and retry without kn_caption
+        const msg = String(err?.message || err?.toString() || '').toLowerCase();
+        if (msg.includes('kn_caption') || msg.includes('column') || msg.includes('does not exist')) {
+          try {
+            const { error: retryError } = await supabase.from('posts').insert({
+              user_id: user?.id,
+              content: newPostContent,
+              images: mediaUrls,
+            });
+            if (retryError) throw retryError;
+            insertError = null;
+          } catch (retryErr) {
+            insertError = retryErr;
+          }
+        }
+      }
+
+      if (insertError) throw insertError;
 
       setNewPostContent('')
       setMediaFiles([])
@@ -109,9 +141,10 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error creating post:', error)
+      const msg = (error as any)?.message ?? String(error)
       toast({
         title: 'Error creating post',
-        description: 'Please try again later',
+        description: msg || 'Please try again later',
         variant: 'destructive'
       })
     } finally {
@@ -119,13 +152,13 @@ export default function Community() {
     }
   }
 
-  const handleLike = async (postId) => {
+  const handleLike = async (postId: string) => {
     try {
       const { data: existingLike } = await supabase
         .from('likes')
         .select()
         .eq('post_id', postId)
-        .eq('user_id', user.id)
+        .eq('user_id', user?.id)
         .single()
 
       if (existingLike) {
@@ -133,34 +166,35 @@ export default function Community() {
           .from('likes')
           .delete()
           .eq('post_id', postId)
-          .eq('user_id', user.id)
+          .eq('user_id', user?.id)
       } else {
         await supabase
           .from('likes')
           .insert({
             post_id: postId,
-            user_id: user.id
+            user_id: user?.id
           })
       }
 
       fetchPosts()
     } catch (error) {
       console.error('Error toggling like:', error)
-      toast({
-        title: 'Error',
-        description: 'Could not like/unlike the post',
-        variant: 'destructive'
-      })
+        const msg = (error as any)?.message ?? String(error)
+        toast({
+          title: 'Error',
+          description: msg || 'Could not like/unlike the post',
+          variant: 'destructive'
+        })
     }
   }
 
-  const handleComment = async (postId, content) => {
+  const handleComment = async (postId: string, content: string) => {
     try {
       const { error } = await supabase
         .from('comments')
         .insert({
           post_id: postId,
-          user_id: user.id,
+          user_id: user?.id,
           content
         })
 
@@ -173,15 +207,16 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error adding comment:', error)
-      toast({
-        title: 'Error',
-        description: 'Could not add your comment',
-        variant: 'destructive'
-      })
+        const msg = (error as any)?.message ?? String(error)
+        toast({
+          title: 'Error',
+          description: msg || 'Could not add your comment',
+          variant: 'destructive'
+        })
     }
   }
 
-  const handleDeletePost = async (postId) => {
+  const handleDeletePost = async (postId: string) => {
     try {
       const { error } = await supabase
         .from('posts')
@@ -197,17 +232,18 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error deleting post:', error)
-      toast({
-        title: 'Error',
-        description: 'Could not delete the post',
-        variant: 'destructive'
-      })
+        const msg = (error as any)?.message ?? String(error)
+        toast({
+          title: 'Error',
+          description: msg || 'Could not delete the post',
+          variant: 'destructive'
+        })
     }
   }
 
   return (
     <Layout>
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-8 relative">
         <Card className="mb-8">
           <div className="p-4">
             <Button
@@ -276,6 +312,15 @@ export default function Community() {
             />
           ))}
         </div>
+
+        {/* Floating create post button */}
+        <button
+          onClick={() => setIsCreatingPost(true)}
+          className="fixed bottom-6 right-6 z-50 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-xl"
+          aria-label="Create Post"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
       </div>
     </Layout>
   )

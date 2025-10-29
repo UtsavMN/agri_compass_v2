@@ -1,0 +1,30 @@
+district,recommended_crops,soil_type,avg_rainfall,weather_pattern
+Mysuru,Rice, Sugarcane, Coconut,Red loam,850mm,Tropical
+Mandya,Sugarcane, Rice, Ragi,Alluvial,900mm,Semi-arid
+Hassan,Coffee, Rice, Pepper,Laterite,1200mm,Sub-tropical
+Bangalore Rural,Ragi, Groundnut, Vegetables,Red sandy,800mm,Semi-arid
+Tumakuru,Ragi, Groundnut, Sunflower,Red loam,700mm,Semi-arid
+Chikkamagaluru,Coffee, Pepper, Cardamom,Laterite,2000mm,Tropical
+Dakshina Kannada,Coconut, Arecanut, Rubber,Laterite,3500mm,Tropical
+Udupi,Rice, Coconut, Cashew,Laterite,4000mm,Tropical
+Belagavi,Sugarcane, Cotton, Soybean,Black,750mm,Semi-arid
+Vijayapura,Cotton, Sorghum, Groundnut,Black,650mm,Semi-arid
+Bagalkot,Cotton, Sunflower, Safflower,Black,550mm,Semi-arid
+Dharwad,Cotton, Maize, Groundnut,Black,700mm,Semi-arid
+Gadag,Cotton, Maize, Sunflower,Black,600mm,Semi-arid
+Haveri,Cotton, Maize, Soybean,Black,750mm,Semi-arid
+Uttara Kannada,Cashew, Coconut, Pepper,Laterite,2500mm,Tropical
+Chitradurga,Ragi, Groundnut, Sunflower,Red loam,600mm,Semi-arid
+Davanagere,Ragi, Maize, Groundnut,Red loam,650mm,Semi-arid
+Shivamogga,Rice, Coffee, Pepper,Laterite,1800mm,Tropical
+Ballari,Groundnut, Sunflower, Safflower,Red sandy,550mm,Semi-arid
+Koppal,Groundnut, Sunflower, Bajra,Red sandy,550mm,Semi-arid
+Raichur,Groundnut, Sunflower, Safflower,Red sandy,600mm,Semi-arid
+Yadgir,Groundnut, Sunflower, Bajra,Red sandy,650mm,Semi-arid
+Kalaburagi,Sorghum, Groundnut, Sunflower,Black,700mm,Semi-arid
+Bidar,Sorghum, Groundnut, Sunflower,Black,750mm,Semi-arid
+Vijayanagara,Groundnut, Sunflower, Bajra,Red sandy,500mm,Semi-arid
+Chamarajanagar,Rice, Sugarcane, Coconut,Red loam,800mm,Tropical
+Ramanagara,Rice, Ragi, Vegetables,Red loam,850mm,Semi-arid
+Kodagu,Coffee, Pepper, Cardamom,Laterite,3000mm,Tropical
+Kolar,Ragi, Groundnut, Vegetables,Red loam,750mm,Semi-arid

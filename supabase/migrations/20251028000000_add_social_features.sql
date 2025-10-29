@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS posts (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
+    kn_caption TEXT,
     images TEXT[] DEFAULT '{}',
     video_url TEXT,
     hashtags TEXT[] DEFAULT '{}',

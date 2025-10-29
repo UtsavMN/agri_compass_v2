@@ -14,13 +14,12 @@ import {
   Home,
   Sprout,
   TrendingUp,
-  Users,
   HelpCircle,
-  Cloud,
   FileText,
   User,
   LogOut,
   Menu,
+  Cloud,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -39,12 +38,13 @@ export default function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/my-farms', label: 'My Farms', icon: Sprout },
+    { path: '/my-farm', label: 'MyFarm', icon: Sprout },
     { path: '/market-prices', label: 'Market Prices', icon: TrendingUp },
     { path: '/schemes', label: 'Gov Schemes', icon: FileText },
-    { path: '/community', label: 'Community', icon: Users },
+    { path: '/air-agent', label: 'AirAgent', icon: HelpCircle },
     { path: '/expert-help', label: 'Expert Help', icon: HelpCircle },
     { path: '/weather', label: 'Weather', icon: Cloud },
+    { path: '/community', label: 'Community', icon: User },
   ];
 
   if (!user) {
@@ -56,7 +56,7 @@ export default function Layout({ children }: LayoutProps) {
       <nav className="bg-white/80 backdrop-blur-sm border-b border-green-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/dashboard" className="flex items-center space-x-2">
+            <Link to="/home" className="flex items-center space-x-2">
               <Sprout className="h-8 w-8 text-green-600" />
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Agri Compass

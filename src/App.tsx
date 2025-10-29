@@ -1,18 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
-import Index from '@/pages/Index';
+import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
 import CropDetails from '@/pages/CropDetails';
-import MyFarms from '@/pages/MyFarms';
+import MyFarm from '@/pages/MyFarm';
 import MarketPrices from '@/pages/MarketPrices';
 import GovSchemes from '@/pages/GovSchemes';
-import Community from '@/pages/Community';
+import AirAgent from '@/pages/AirAgent';
 import ExpertHelp from '@/pages/ExpertHelp';
-import Weather from '@/pages/Weather';
+import Community from '@/pages/Community';
 import Profile from '@/pages/Profile';
-import Chat from '@/pages/Chat';
+import Weather from '@/pages/Weather';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -20,18 +20,18 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/crop/:cropName" element={<CropDetails />} />
-          <Route path="/my-farms" element={<MyFarms />} />
+          <Route path="/my-farm" element={<MyFarm />} />
           <Route path="/market-prices" element={<MarketPrices />} />
           <Route path="/schemes" element={<GovSchemes />} />
-          <Route path="/community" element={<Community />} />
+          <Route path="/air-agent" element={<AirAgent />} />
           <Route path="/expert-help" element={<ExpertHelp />} />
-          <Route path="/weather" element={<Weather />} />
+          <Route path="/community" element={<Community />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/weather" element={<Weather />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ChatMessage as ProviderMessage, getChatbotProvider } from '@/lib/chatbot';
+import { airAgent, ChatMessage } from '@/lib/ai/airAgent';
+import { Mic } from 'lucide-react';
 
-type ChatMessage = {
+type LocalChatMessage = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -17,14 +19,15 @@ function generateId(): string {
   return Math.random().toString(36).slice(2);
 }
 
-export default function Chat() {
+export default function AirAgent() {
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+  const [messages, setMessages] = useState<LocalChatMessage[]>(() => {
     try {
-      const raw = localStorage.getItem('agri_chat_messages');
-      return raw ? (JSON.parse(raw) as ChatMessage[]) : [];
+      const raw = localStorage.getItem('airagent_chat_messages');
+      return raw ? (JSON.parse(raw) as LocalChatMessage[]) : [];
     } catch {
       return [];
     }
@@ -32,7 +35,7 @@ export default function Chat() {
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('agri_chat_messages', JSON.stringify(messages));
+    localStorage.setItem('airagent_chat_messages', JSON.stringify(messages));
   }, [messages]);
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export default function Chat() {
     const trimmed = input.trim();
     if (!trimmed) return;
     setSending(true);
-    const userMsg: ChatMessage = {
+    const userMsg: LocalChatMessage = {
       id: generateId(),
       role: 'user',
       content: trimmed,
@@ -55,13 +58,12 @@ export default function Chat() {
     setInput('');
 
     try {
-      const provider = getChatbotProvider();
-      const history: ProviderMessage[] = [...messages, userMsg].map((m) => ({
+      const history: ChatMessage[] = [...messages, userMsg].map((m) => ({
         role: m.role,
         content: m.content,
       }));
-      const answer = await provider.sendMessage(history);
-      const assistantMsg: ChatMessage = {
+      const answer = await airAgent.sendMessage(history, profile?.location || 'Karnataka');
+      const assistantMsg: LocalChatMessage = {
         id: generateId(),
         role: 'assistant',
         content: answer,
@@ -91,8 +93,8 @@ export default function Chat() {
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Chartboard</h1>
-          <p className="text-gray-600 mt-2">Ask crop advice or platform help</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">AirAgent</h1>
+          <p className="text-gray-600 mt-2">Your AI-powered agricultural assistant for Karnataka farmers</p>
         </div>
 
         <Card>
@@ -136,9 +138,12 @@ export default function Chat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your message..."
+                placeholder="Ask about crops, weather, or farming advice..."
                 disabled={sending}
               />
+              <Button variant="outline" size="icon" disabled={sending}>
+                <Mic className="h-4 w-4" />
+              </Button>
               <Button onClick={sendMessage} disabled={sending} className="bg-green-600 hover:bg-green-700">
                 {sending ? 'Sending…' : 'Send'}
               </Button>
