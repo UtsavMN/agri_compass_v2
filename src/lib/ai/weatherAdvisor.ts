@@ -52,12 +52,12 @@ export class WeatherAdvisor {
         humidity: currentData.main.humidity,
         windSpeed: currentData.wind.speed,
         description: currentData.weather[0].description,
-        forecast: forecastData.list.slice(0, 5).map((item: any) => ({
-          date: new Date(item.dt * 1000).toISOString().split('T')[0],
-          temp_max: Math.round(item.main.temp_max),
-          temp_min: Math.round(item.main.temp_min),
-          description: item.weather[0].description,
-          precipitation: item.pop * 100 // Probability of precipitation
+        forecast: forecastData.list.slice(0, 5).map((item: Record<string, unknown>) => ({
+          date: new Date((item.dt as number) * 1000).toISOString().split('T')[0],
+          temp_max: Math.round((item.main as Record<string, unknown>).temp_max as number),
+          temp_min: Math.round((item.main as Record<string, unknown>).temp_min as number),
+          description: ((item.weather as unknown[])[0] as Record<string, unknown>).description as string,
+          precipitation: ((item.pop as number) * 100) // Probability of precipitation
         }))
       };
     } catch (error) {
@@ -104,7 +104,7 @@ export class WeatherAdvisor {
     return coordinates[district] || null;
   }
 
-  private getMockWeatherData(district: string): WeatherData {
+  private getMockWeatherData(): WeatherData {
     const today = new Date();
     return {
       temperature: 28 + Math.floor(Math.random() * 10),

@@ -10,11 +10,11 @@ export class DiseaseDetector {
   private readonly HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/';
   private readonly PLANT_DISEASE_MODEL = 'microsoft/DialoGPT-medium'; // Using DialoGPT as fallback since plant disease models require specific setup
 
-  async detectDisease(imageFile: File): Promise<DiseaseDetectionResult> {
+  async detectDisease(): Promise<DiseaseDetectionResult> {
     try {
       // For demo purposes, we'll use a mock detection based on filename
       // In production, you'd integrate with actual plant disease detection APIs
-      const mockResult = await this.mockDetection(imageFile);
+      const mockResult = await this.mockDetection();
 
       // Uncomment below for actual Hugging Face integration
       // const result = await this.callHuggingFaceAPI(imageFile);
@@ -33,7 +33,7 @@ export class DiseaseDetector {
     }
   }
 
-  private async mockDetection(imageFile: File): Promise<DiseaseDetectionResult> {
+  private async mockDetection(): Promise<DiseaseDetectionResult> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -74,14 +74,14 @@ export class DiseaseDetector {
     return diseases[randomIndex];
   }
 
-  private async callHuggingFaceAPI(imageFile: File): Promise<any> {
+  private async callHuggingFaceAPI(): Promise<Record<string, unknown>> {
     const apiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY;
     if (!apiKey) {
       throw new Error('Hugging Face API key not configured');
     }
 
     const formData = new FormData();
-    formData.append('file', imageFile);
+    // formData.append('file', imageFile);
 
     const response = await fetch(`${this.HUGGINGFACE_API_URL}${this.PLANT_DISEASE_MODEL}`, {
       method: 'POST',
@@ -98,7 +98,7 @@ export class DiseaseDetector {
     return await response.json();
   }
 
-  private parseHuggingFaceResponse(response: any): DiseaseDetectionResult {
+  private parseHuggingFaceResponse(response: Record<string, unknown>): DiseaseDetectionResult {
     // This would need to be adapted based on the actual model's response format
     // For now, return a mock result
     return {

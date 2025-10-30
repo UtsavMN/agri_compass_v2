@@ -9,7 +9,6 @@ import MyFarm from '@/pages/MyFarm';
 import MarketPrices from '@/pages/MarketPrices';
 import GovSchemes from '@/pages/GovSchemes';
 import AirAgent from '@/pages/AirAgent';
-import ExpertHelp from '@/pages/ExpertHelp';
 import Community from '@/pages/Community';
 import Profile from '@/pages/Profile';
 import Weather from '@/pages/Weather';
@@ -28,7 +27,6 @@ function App() {
           <Route path="/market-prices" element={<MarketPrices />} />
           <Route path="/schemes" element={<GovSchemes />} />
           <Route path="/air-agent" element={<AirAgent />} />
-          <Route path="/expert-help" element={<ExpertHelp />} />
           <Route path="/community" element={<Community />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/weather" element={<Weather />} />

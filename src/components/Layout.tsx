@@ -41,8 +41,7 @@ export default function Layout({ children }: LayoutProps) {
     { path: '/my-farm', label: 'MyFarm', icon: Sprout },
     { path: '/market-prices', label: 'Market Prices', icon: TrendingUp },
     { path: '/schemes', label: 'Gov Schemes', icon: FileText },
-    { path: '/air-agent', label: 'AirAgent', icon: HelpCircle },
-    { path: '/expert-help', label: 'Expert Help', icon: HelpCircle },
+    { path: '/air-agent', label: 'AI Agent', icon: HelpCircle },
     { path: '/weather', label: 'Weather', icon: Cloud },
     { path: '/community', label: 'Community', icon: User },
   ];

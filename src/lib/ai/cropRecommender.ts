@@ -90,7 +90,7 @@ export class CropRecommender {
     });
   }
 
-  async getRecommendations(district: string, soilType?: string, season?: string): Promise<CropRecommendation[]> {
+  async getRecommendations(district: string): Promise<CropRecommendation[]> {
     const districts = await this.loadDistricts();
     const districtData = districts.find(d => d.district.toLowerCase() === district.toLowerCase());
 
@@ -110,7 +110,7 @@ export class CropRecommender {
       recommendations.push({
         cropName: crop,
         reason: `Suitable for ${districtData.soil_type} soil and ${districtData.weather_pattern} climate`,
-        season: this.getSeasonForCrop(crop, districtData.weather_pattern),
+        season: this.getSeasonForCrop(crop),
         expectedYield: this.getExpectedYield(crop, districtData.avg_rainfall)
       });
     }
@@ -118,7 +118,7 @@ export class CropRecommender {
     return recommendations;
   }
 
-  private getSeasonForCrop(crop: string, weather: string): string {
+  private getSeasonForCrop(crop: string): string {
     const cropSeasons: { [key: string]: string } = {
       'Rice': 'Kharif',
       'Sugarcane': 'Year-round',

@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         // supabase.auth.getSession() returns { data: { session }, error } in v2
-        const maybe = await (supabase.auth as any).getSession?.()
+        const maybe = await (supabase.auth as unknown as { getSession?: () => Promise<{ data: { session: Session | null } }> }).getSession?.()
         if (maybe && maybe.data) {
           const { session } = maybe.data
           setSession(session)
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } else {
           // fallback for older SDKs or unexpected shapes
-          const fallback = (supabase.auth as any).session?.()
+          const fallback = (supabase.auth as unknown as { session?: () => Session | null }).session?.()
           const s = fallback?.user ? fallback : null
           setSession(s)
           setUser(s?.user ?? null)
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })()
 
     // Subscribe to auth state changes. v2 returns { data: { subscription } }
-    const sub = (supabase.auth as any).onAuthStateChange?.((_event: any, session: any) => {
+    const sub = (supabase.auth as unknown as { onAuthStateChange?: (callback: (event: string, session: Session | null) => void) => { data: { subscription: { unsubscribe: () => void } } } }).onAuthStateChange?.((_event: string, session: Session | null) => {
       (async () => {
         setSession(session)
         setUser(session?.user ?? null)
@@ -81,8 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // If v2 shape, sub.data.subscription exists
     try {
-      if (sub && sub.data && sub.data.subscription) {
-        return () => sub.data.subscription.unsubscribe()
+      if (sub && (sub as { data: { subscription: { unsubscribe: () => void } } }).data && (sub as { data: { subscription: { unsubscribe: () => void } } }).data.subscription) {
+        return () => (sub as { data: { subscription: { unsubscribe: () => void } } }).data.subscription.unsubscribe()
       }
     } catch (e) {
       // otherwise try to unsubscribe if function returned

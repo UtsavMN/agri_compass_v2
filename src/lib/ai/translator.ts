@@ -15,7 +15,7 @@ export async function translateToKannada(text: string): Promise<string> {
     // Parse Google Translate response
     if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
       const translatedText = data[0]
-        .map((item: any) => item[0])
+        .map((item: unknown[]) => item[0] as string)
         .filter((text: string) => text)
         .join('');
 
@@ -44,7 +44,7 @@ export async function translateToEnglish(text: string): Promise<string> {
 
     if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
       const translatedText = data[0]
-        .map((item: any) => item[0])
+        .map((item: unknown[]) => item[0] as string)
         .filter((text: string) => text)
         .join('');
 

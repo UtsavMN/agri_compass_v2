@@ -80,9 +80,9 @@ export function PostCard({
             <Avatar>
               {/* Avatar component exposes AvatarImage and AvatarFallback from our ui/avatar.tsx */}
               {/* Use those named exports to avoid TypeScript errors */}
-              {/* @ts-ignore-next-line */}
+              {/* @ts-expect-error */}
               <AvatarImage src={post.user.avatar_url} />
-              {/* @ts-ignore-next-line */}
+              {/* @ts-expect-error */}
               <AvatarFallback>{post.user.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>

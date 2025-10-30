@@ -15,7 +15,7 @@ import { useDropzone } from 'react-dropzone'
 export default function Community() {
   const { user } = useAuth()
   const { toast } = useToast()
-  const [posts, setPosts] = useState<any[]>([])
+  const [posts, setPosts] = useState<Record<string, unknown>[]>([])
   const [newPostContent, setNewPostContent] = useState('')
   const [isCreatingPost, setIsCreatingPost] = useState(false)
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
@@ -56,7 +56,7 @@ export default function Community() {
       setPosts(data)
     } catch (error) {
       console.error('Error fetching posts:', error)
-      const msg = (error as any)?.message ?? String(error)
+      const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
       toast({
         title: 'Error fetching posts',
         description: msg || 'Please try again later',
@@ -141,7 +141,7 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error creating post:', error)
-      const msg = (error as any)?.message ?? String(error)
+      const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
       toast({
         title: 'Error creating post',
         description: msg || 'Please try again later',
@@ -179,7 +179,7 @@ export default function Community() {
       fetchPosts()
     } catch (error) {
       console.error('Error toggling like:', error)
-        const msg = (error as any)?.message ?? String(error)
+        const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
         toast({
           title: 'Error',
           description: msg || 'Could not like/unlike the post',
@@ -207,7 +207,7 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error adding comment:', error)
-        const msg = (error as any)?.message ?? String(error)
+        const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
         toast({
           title: 'Error',
           description: msg || 'Could not add your comment',
@@ -232,7 +232,7 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error deleting post:', error)
-        const msg = (error as any)?.message ?? String(error)
+        const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
         toast({
           title: 'Error',
           description: msg || 'Could not delete the post',
@@ -306,7 +306,7 @@ export default function Community() {
               onLike={handleLike}
               onComment={handleComment}
               onDelete={handleDeletePost}
-              onShare={(postId) => {
+              onShare={(postId: string) => {
                 navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`)
               }}
             />

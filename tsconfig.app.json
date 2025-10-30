@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    // ignoreDeprecations is set to silence deprecation warnings about options like "baseUrl" in TypeScript 6.x
 
     /* Bundler mode */
     "moduleResolution": "bundler",

@@ -28,7 +28,7 @@ Always provide actionable, farmer-friendly advice. Use district-specific informa
     return this.sendMessage([{ role: 'user', content: prompt }], district);
   }
 
-  async getWeatherAdvice(weatherData: any, district: string): Promise<string> {
+  async getWeatherAdvice(weatherData: Record<string, unknown>, district: string): Promise<string> {
     const prompt = `Based on this weather: ${JSON.stringify(weatherData)}, give farming advice for ${district}.`;
     return this.sendMessage([{ role: 'user', content: prompt }], district);
   }

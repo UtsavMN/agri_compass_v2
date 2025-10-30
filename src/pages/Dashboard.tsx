@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { cropRecommender, DetailedCropData } from '@/lib/ai/cropRecommender';
+import { cropRecommender } from '@/lib/ai/cropRecommender';
 import { weatherAdvisor } from '@/lib/ai/weatherAdvisor';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { CropCard } from '@/components/ui/crop-card';
+
 import { CardShimmer, CropCardShimmer } from '@/components/ui/loading-shimmer';
-import { Sprout, TrendingUp, Users, FileText, Cloud, HelpCircle, Leaf, MapPin, Zap, Droplets, Thermometer } from 'lucide-react';
+import { Sprout, TrendingUp, Users, FileText, Cloud, Leaf, MapPin, Zap, Droplets, Thermometer } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Crop {
@@ -53,7 +53,7 @@ export default function Dashboard() {
   const [cropRecommendations, setCropRecommendations] = useState<CropRecommendation[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [newsItems, setNewsItems] = useState<string[]>([]);
-  const [detailedCrops, setDetailedCrops] = useState<DetailedCropData[]>([]);
+
 
   useEffect(() => {
     if (!user) {
@@ -109,9 +109,7 @@ export default function Dashboard() {
       if (error) throw error;
       setCrops(data || []);
 
-      // Load detailed crop data
-      const detailedCropData = await cropRecommender.getAllCrops();
-      setDetailedCrops(detailedCropData.slice(0, 8)); // Show first 8 crops
+
 
       // Load news items (mock for now)
       setNewsItems([
@@ -173,18 +171,11 @@ export default function Dashboard() {
       path: '/schemes',
     },
     {
-      title: 'Air Agent',
+      title: 'AI Agent',
       description: 'AI farming assistant',
       icon: Zap,
       color: 'bg-cyan-500',
       path: '/air-agent',
-    },
-    {
-      title: 'Expert Help',
-      description: 'Ask questions',
-      icon: HelpCircle,
-      color: 'bg-pink-500',
-      path: '/expert-help',
     },
   ];
 
@@ -474,13 +465,6 @@ export default function Dashboard() {
                 className="bg-white text-green-600 hover:bg-gray-100"
               >
                 Ask AI Assistant
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => navigate('/expert-help')}
-                className="bg-white text-green-600 hover:bg-gray-100"
-              >
-                Ask Expert
               </Button>
             </div>
           </CardContent>

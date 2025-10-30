@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+
 import Layout from '@/components/Layout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,6 @@ function generateId(): string {
 }
 
 export default function AirAgent() {
-  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -62,7 +61,7 @@ export default function AirAgent() {
         role: m.role,
         content: m.content,
       }));
-      const answer = await airAgent.sendMessage(history, profile?.location || 'Karnataka');
+      const answer = await airAgent.sendMessage(history, 'Karnataka');
       const assistantMsg: LocalChatMessage = {
         id: generateId(),
         role: 'assistant',
@@ -93,7 +92,7 @@ export default function AirAgent() {
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">AirAgent</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">AI Agent</h1>
           <p className="text-gray-600 mt-2">Your AI-powered agricultural assistant for Karnataka farmers</p>
         </div>
 

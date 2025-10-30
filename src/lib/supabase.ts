@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 // If environment variables are not set (common when running without .env.local),
 // avoid calling createClient at import-time because the library validates the
 // URL and will throw — this prevents the whole app from crashing on import.
-let supabase: SupabaseClient | any
+let supabase: SupabaseClient | Record<string, unknown>
 if (supabaseUrl && supabaseAnonKey) {
 	// Normal operation: create a real Supabase client
 	supabase = createClient(supabaseUrl, supabaseAnonKey)
@@ -22,7 +22,7 @@ if (supabaseUrl && supabaseAnonKey) {
 		auth: {
 			getSession: async () => ({ data: { session: null } }),
 			// onAuthStateChange usually returns { data, subscription }
-			onAuthStateChange: (_cb: any) => ({ data: { session: null }, subscription: { unsubscribe: () => {} } }),
+			onAuthStateChange: (_cb: unknown) => ({ data: { session: null }, subscription: { unsubscribe: () => {} } }),
 			signUp: noop,
 			signInWithPassword: noop,
 			signOut: noop,

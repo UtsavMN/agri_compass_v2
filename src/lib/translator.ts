@@ -7,7 +7,7 @@ export async function translateToKannada(text: string): Promise<string> {
     const data = await res.json();
     // The response format is nested arrays; join the translated pieces
     if (Array.isArray(data)) {
-      return data[0].map((item: any) => item[0]).join('') || '';
+      return data[0].map((item: unknown[]) => item[0] as string).join('') || '';
     }
     return '';
   } catch (e) {
