@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { CropCard } from '@/components/ui/crop-card';
+import { CardShimmer, CropCardShimmer } from '@/components/ui/loading-shimmer';
 import { Sprout, TrendingUp, Users, FileText, Cloud, HelpCircle, Leaf, MapPin, Zap, Droplets, Thermometer } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -48,6 +49,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [districts, setDistricts] = useState<string[]>([]);
+  const [districtData, setDistrictData] = useState<any[]>([]);
   const [cropRecommendations, setCropRecommendations] = useState<CropRecommendation[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [newsItems, setNewsItems] = useState<string[]>([]);
@@ -67,14 +69,34 @@ export default function Dashboard() {
     }
   }, [selectedDistrict]);
 
+  const loadDistrictDataFromCSV = async () => {
+    try {
+      const response = await fetch('/districts.csv');
+      const csvText = await response.text();
+      const lines = csvText.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',');
+      const data = lines.slice(1).map(line => {
+        const values = line.split(',');
+        const obj: any = {};
+        headers.forEach((header, index) => {
+          obj[header.trim()] = values[index]?.trim();
+        });
+        return obj;
+      });
+      setDistrictData(data);
+      setDistricts(data.map(d => d.district));
+    } catch (error) {
+      console.error('Error loading district data:', error);
+    }
+  };
+
   const initializeDashboard = async () => {
     try {
-      // Load districts
-      const districtList = await cropRecommender.getDistricts();
-      setDistricts(districtList);
+      // Load districts from CSV
+      await loadDistrictDataFromCSV();
 
       // Set default district from profile or first available
-      const defaultDistrict = profile?.location || districtList[0] || '';
+      const defaultDistrict = profile?.location || districts[0] || '';
       setSelectedDistrict(defaultDistrict);
 
       // Load crops
@@ -191,7 +213,7 @@ export default function Dashboard() {
                   <SelectValue placeholder="Select district" />
                 </SelectTrigger>
                 <SelectContent>
-                  {districts.map((district) => (
+                  {districts.sort().map((district) => (
                     <SelectItem key={district} value={district}>
                       {district}
                     </SelectItem>
@@ -275,7 +297,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-600">Loading weather data...</p>
+                  <CardShimmer />
                 )}
               </CardContent>
             </Card>
@@ -290,46 +312,59 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 {cropRecommendations.length > 0 ? (
-                  <div className="space-y-3">
-                    {cropRecommendations.map((rec, index) => (
-                      <div key={index} className="border rounded-lg p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold">{rec.cropName}</h4>
-                          <Badge variant="outline">{rec.season}</Badge>
+                  <div className="space-y-4">
+                    {cropRecommendations.slice(0, 4).map((rec, index) => {
+                      const districtInfo = districtData.find(d => d.district === selectedDistrict);
+                      const recommendedCrops = districtInfo?.recommended_crops?.split(', ') || [];
+                      const isRecommended = recommendedCrops.includes(rec.cropName);
+
+                      return (
+                        <div key={index} className="border rounded-lg p-4 bg-green-50/50">
+                          <div className="flex justify-between items-start mb-3">
+                            <h4 className="font-semibold text-green-800 text-lg">{rec.cropName}</h4>
+                            <div className="flex gap-2">
+                              {isRecommended && <Badge variant="default" className="bg-green-600">Recommended</Badge>}
+                              <Badge variant="outline">{rec.season}</Badge>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
+                          <p className="text-sm text-green-600 font-medium mb-3">Expected: {rec.expectedYield}</p>
+
+                          {/* District-specific information from CSV */}
+                          {districtInfo && (
+                            <div className="space-y-2 text-sm">
+                              <div>
+                                <span className="font-medium text-gray-700">Soil Type:</span>
+                                <p className="text-gray-600 mt-1">{districtInfo.soil_type}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Average Rainfall:</span>
+                                <p className="text-gray-600 mt-1">{districtInfo.avg_rainfall}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Weather Pattern:</span>
+                                <p className="text-gray-600 mt-1">{districtInfo.weather_pattern}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
-                        <p className="text-sm text-green-600 font-medium">Expected: {rec.expectedYield}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
-                  <p className="text-gray-600">Loading crop recommendations...</p>
+                  <CardShimmer />
                 )}
               </CardContent>
             </Card>
           </div>
         )}
 
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Detailed Crop Information</h2>
-          {loading ? (
-            <p className="text-gray-600">Loading crops...</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {detailedCrops.map((crop, index) => (
-                <CropCard
-                  key={`${crop.crop}-${crop.region}-${index}`}
-                  crop={crop}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+
 
         <div>
           <h2 className="text-2xl font-bold mb-4">Popular Crops</h2>
           {loading ? (
-            <p className="text-gray-600">Loading crops...</p>
+            <CropCardShimmer count={6} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {crops.map((crop) => (
@@ -344,6 +379,7 @@ export default function Dashboard() {
                         src={crop.image_url}
                         alt={crop.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
                       />
                     </div>
                   )}
@@ -364,6 +400,47 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* District-wise Crop Recommendations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recommended Crops by District</CardTitle>
+            <CardDescription>
+              Overview of recommended crops for all districts in Karnataka
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {districtData.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {districtData.map((district, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-green-50/50 hover:bg-green-100/50 transition-colors">
+                    <h4 className="font-semibold text-green-800 mb-2">{district.district}</h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">Recommended Crops:</span>
+                        <p className="text-gray-600">{district.recommended_crops}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Soil Type:</span>
+                        <p className="text-gray-600">{district.soil_type}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Avg Rainfall:</span>
+                        <p className="text-gray-600">{district.avg_rainfall}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Weather:</span>
+                        <p className="text-gray-600">{district.weather_pattern}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <CardShimmer />
+            )}
+          </CardContent>
+        </Card>
 
         {/* News Section */}
         <Card>

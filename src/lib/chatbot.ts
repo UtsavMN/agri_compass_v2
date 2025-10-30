@@ -69,10 +69,19 @@ class RemoteChatbotProvider implements ChatbotProvider {
       }
 
       const data = await response.json();
-      return data.response || data.text || data.message || JSON.stringify(data);
+      const responseText = data.response || data.text || data.message || JSON.stringify(data);
+
+      // Add fallback for empty or invalid responses
+      if (!responseText || responseText.trim().length === 0) {
+        console.warn('Empty response from API, using fallback');
+        return new DefaultChatbotProvider().sendMessage(messages);
+      }
+
+      return responseText;
     } catch (error) {
       console.error('Failed to communicate with API:', error);
-      return 'Sorry, I could not get a response from the server.';
+      // Fallback to default provider on any error
+      return new DefaultChatbotProvider().sendMessage(messages);
     }
   }
 }
