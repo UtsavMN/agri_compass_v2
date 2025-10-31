@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { TrendingUp, MapPin, Calendar, Search, BarChart3, Filter, Globe } from 'lucide-react';
+import { ScrollReveal, FadeIn } from '@/components/ui/animations';
+import { TrendingUp, MapPin, Calendar, Search, BarChart3, Filter, Globe, ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { motion } from 'framer-motion';
+import { MiniSparkline } from '@/components/ui/charts';
 
 interface MarketPrice {
   id: string;
@@ -70,7 +72,7 @@ export default function MarketPrices() {
 
   const loadPrices = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('market_prices')
         .select(`
           *,
@@ -165,88 +167,95 @@ export default function MarketPrices() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              Market Prices
-            </h1>
-            <p className="text-gray-600 mt-2">Live crop prices across Karnataka markets</p>
+        <ScrollReveal>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-gradient">
+                Market Prices
+              </h1>
+              <p className="text-gray-600 mt-2">Live crop prices across Karnataka markets</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`p-2 rounded-lg transition-all duration-200 card-interactive ${viewMode === 'cards' ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              >
+                <Filter className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('charts')}
+                className={`p-2 rounded-lg transition-all duration-200 card-interactive ${viewMode === 'charts' ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              >
+                <BarChart3 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+        </ScrollReveal>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setViewMode('cards')}
-              className={`p-2 rounded-lg ${viewMode === 'cards' ? 'bg-green-100 text-green-700' : 'text-gray-500'}`}
-            >
-              <Filter className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('charts')}
-              className={`p-2 rounded-lg ${viewMode === 'charts' ? 'bg-green-100 text-green-700' : 'text-gray-500'}`}
-            >
-              <BarChart3 className="h-4 w-4" />
-            </button>
+        <ScrollReveal delay={0.2}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search crops..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 input-field"
+              />
+            </div>
+
+            <Select value={districtFilter} onValueChange={setDistrictFilter}>
+              <SelectTrigger className="input-field">
+                <SelectValue placeholder="Filter by district" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Districts</SelectItem>
+                {districts.map((district) => (
+                  <SelectItem key={district} value={district}>
+                    {district}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="input-field">
+                <SelectValue placeholder="Filter by location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                {locations.map((location) => (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={cropFilter} onValueChange={setCropFilter}>
+              <SelectTrigger className="input-field">
+                <SelectValue placeholder="Filter by crop" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Crops</SelectItem>
+                {crops.map((crop) => (
+                  <SelectItem key={crop} value={crop}>
+                    {crop}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search crops..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          <Select value={districtFilter} onValueChange={setDistrictFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by district" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Districts</SelectItem>
-              {districts.map((district) => (
-                <SelectItem key={district} value={district}>
-                  {district}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={locationFilter} onValueChange={setLocationFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by location" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Locations</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location} value={location}>
-                  {location}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={cropFilter} onValueChange={setCropFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by crop" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Crops</SelectItem>
-              {crops.map((crop) => (
-                <SelectItem key={crop} value={crop}>
-                  {crop}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        </ScrollReveal>
 
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading market prices...</p>
-          </div>
+          <ScrollReveal delay={0.4}>
+            <div className="text-center py-12">
+              <div className="loading-shimmer h-6 w-48 rounded mb-4 mx-auto"></div>
+              <p className="text-gray-600">Loading market prices...</p>
+            </div>
+          </ScrollReveal>
         ) : viewMode === 'charts' ? (
           <div className="space-y-6">
             <Card>
@@ -301,72 +310,72 @@ export default function MarketPrices() {
             </Card>
           </div>
         ) : filteredPrices.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No prices found</h3>
-              <p className="text-gray-600">Try adjusting your search filters</p>
-            </CardContent>
-          </Card>
+          <ScrollReveal delay={0.4}>
+            <Card className="text-center py-12 card-hover">
+              <CardContent>
+                <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4 animate-bounce-gentle" />
+                <h3 className="text-xl font-semibold mb-2">No prices found</h3>
+                <p className="text-gray-600">Try adjusting your search filters</p>
+              </CardContent>
+            </Card>
+          </ScrollReveal>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPrices.map((price, index) => {
-              const trend = getPriceTrend(price.price_per_unit, filteredPrices.slice(index + 1, index + 4).map(p => p.price_per_unit));
-              return (
-                <motion.div
-                  key={price.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <Card className="hover:shadow-lg transition-shadow duration-300 border-green-100">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-xl text-green-700">
-                            {price.crops.name}
-                          </CardTitle>
-                          <CardDescription className="text-xs mt-1">
-                            {price.crops.category}
-                          </CardDescription>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-green-600">
-                            {formatPrice(price.price_per_unit)}
+          <ScrollReveal delay={0.4}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPrices.map((price, index) => {
+                const trend = getPriceTrend(price.price_per_unit, filteredPrices.slice(index + 1, index + 4).map(p => p.price_per_unit));
+                return (
+                  <FadeIn key={price.id} delay={index * 0.1}>
+                    <Card className="card-hover border-green-100">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-xl text-green-700 flex items-center gap-2">
+                              <DollarSign className="h-5 w-5" />
+                              {price.crops.name}
+                            </CardTitle>
+                            <CardDescription className="text-xs mt-1">
+                              {price.crops.category}
+                            </CardDescription>
                           </div>
-                          <div className="text-xs text-gray-500">per {price.unit}</div>
-                          {trend !== 0 && (
-                            <Badge
-                              variant={trend > 0 ? "default" : "secondary"}
-                              className={`text-xs mt-1 ${trend > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-                            >
-                              {trend > 0 ? '↗' : '↘'} {Math.abs(trend).toFixed(1)}%
-                            </Badge>
-                          )}
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-green-600">
+                              {formatPrice(price.price_per_unit)}
+                            </div>
+                            <div className="text-xs text-gray-500">per {price.unit}</div>
+                            {trend !== 0 && (
+                              <Badge
+                                variant={trend > 0 ? "default" : "secondary"}
+                                className={`text-xs mt-1 transition-all duration-200 ${trend > 0 ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                              >
+                                {trend > 0 ? '↗' : '↘'} {Math.abs(trend).toFixed(1)}%
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Globe className="h-4 w-4 mr-2 text-green-600" />
-                        <span>{price.location}</span>
-                      </div>
-                      {price.market_name && (
+                      </CardHeader>
+                      <CardContent className="space-y-2">
                         <div className="flex items-center text-sm text-gray-600">
-                          <TrendingUp className="h-4 w-4 mr-2 text-blue-600" />
-                          <span>{price.market_name}</span>
+                          <Globe className="h-4 w-4 mr-2 text-green-600" />
+                          <span>{price.location}</span>
                         </div>
-                      )}
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        <span>{formatDate(price.date)}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
+                        {price.market_name && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <TrendingUp className="h-4 w-4 mr-2 text-blue-600" />
+                            <span>{price.market_name}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          <span>{formatDate(price.date)}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </FadeIn>
+                );
+              })}
+            </div>
+          </ScrollReveal>
         )}
       </div>
     </Layout>

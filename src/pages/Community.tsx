@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { translateToKannada } from '@/lib/translator'
+import { PostsAPI, Post } from '@/lib/api/posts'
 import Layout from '@/components/Layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -15,7 +16,7 @@ import { useDropzone } from 'react-dropzone'
 export default function Community() {
   const { user } = useAuth()
   const { toast } = useToast()
-  const [posts, setPosts] = useState<Record<string, unknown>[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [newPostContent, setNewPostContent] = useState('')
   const [isCreatingPost, setIsCreatingPost] = useState(false)
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
@@ -37,22 +38,7 @@ export default function Community() {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('posts')
-        .select(`
-          *,
-          user:user_id (
-            id,
-            username,
-            avatar_url,
-            full_name
-          ),
-          likes:likes(count),
-          comments:comments(count)
-        `)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
+      const data = await PostsAPI.getPosts()
       setPosts(data)
     } catch (error) {
       console.error('Error fetching posts:', error)
@@ -90,46 +76,12 @@ export default function Community() {
         mediaUrls.push(data.publicUrl)
       }
 
-
-      // Translate caption to Kannada (non-blocking if translator fails)
-      let knCaption = ''
-      try {
-        knCaption = await translateToKannada(newPostContent)
-      } catch (e) {
-        console.warn('Translation failed', e)
-      }
-
-      // Create post (includes Kannada caption). If the database doesn't
-      // have the `kn_caption` column yet, try again without it.
-      let insertError: any = null
-      try {
-        const { error } = await supabase.from('posts').insert({
-          user_id: user?.id,
-          content: newPostContent,
-          kn_caption: knCaption || null,
-          images: mediaUrls,
-        });
-        if (error) throw error;
-      } catch (err: any) {
-        insertError = err;
-        // Detect missing-column error (Postgres) and retry without kn_caption
-        const msg = String(err?.message || err?.toString() || '').toLowerCase();
-        if (msg.includes('kn_caption') || msg.includes('column') || msg.includes('does not exist')) {
-          try {
-            const { error: retryError } = await supabase.from('posts').insert({
-              user_id: user?.id,
-              content: newPostContent,
-              images: mediaUrls,
-            });
-            if (retryError) throw retryError;
-            insertError = null;
-          } catch (retryErr) {
-            insertError = retryErr;
-          }
-        }
-      }
-
-      if (insertError) throw insertError;
+      // Create post
+      await PostsAPI.createPost({
+        user_id: user?.id || '',
+        body: newPostContent,
+        images: mediaUrls,
+      })
 
       setNewPostContent('')
       setMediaFiles([])
@@ -154,37 +106,44 @@ export default function Community() {
 
   const handleLike = async (postId: string) => {
     try {
-      const { data: existingLike } = await supabase
+      // Check if user already liked this post
+      const { data: existingLike, error: fetchError } = await supabase
         .from('likes')
         .select()
         .eq('post_id', postId)
         .eq('user_id', user?.id)
         .single()
 
+      if (fetchError && !fetchError.message?.includes('No rows')) throw fetchError
+
       if (existingLike) {
-        await supabase
+        // Unlike the post
+        const { error } = await supabase
           .from('likes')
           .delete()
           .eq('post_id', postId)
           .eq('user_id', user?.id)
+        if (error) throw error
       } else {
-        await supabase
+        // Like the post
+        const { error } = await supabase
           .from('likes')
           .insert({
             post_id: postId,
             user_id: user?.id
           })
+        if (error) throw error
       }
 
       fetchPosts()
     } catch (error) {
       console.error('Error toggling like:', error)
-        const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
-        toast({
-          title: 'Error',
-          description: msg || 'Could not like/unlike the post',
-          variant: 'destructive'
-        })
+      const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
+      toast({
+        title: 'Error',
+        description: msg || 'Could not like/unlike the post',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -197,7 +156,6 @@ export default function Community() {
           user_id: user?.id,
           content
         })
-
       if (error) throw error
 
       fetchPosts()
@@ -207,24 +165,18 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error adding comment:', error)
-        const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
-        toast({
-          title: 'Error',
-          description: msg || 'Could not add your comment',
-          variant: 'destructive'
-        })
+      const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
+      toast({
+        title: 'Error',
+        description: msg || 'Could not add your comment',
+        variant: 'destructive'
+      })
     }
   }
 
   const handleDeletePost = async (postId: string) => {
     try {
-      const { error } = await supabase
-        .from('posts')
-        .delete()
-        .eq('id', postId)
-
-      if (error) throw error
-
+      await PostsAPI.deletePost(postId)
       fetchPosts()
       toast({
         title: 'Post deleted',
@@ -232,12 +184,12 @@ export default function Community() {
       })
     } catch (error) {
       console.error('Error deleting post:', error)
-        const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
-        toast({
-          title: 'Error',
-          description: msg || 'Could not delete the post',
-          variant: 'destructive'
-        })
+      const msg = (error as Record<string, unknown>)?.message as string ?? String(error)
+      toast({
+        title: 'Error',
+        description: msg || 'Could not delete the post',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -301,7 +253,20 @@ export default function Community() {
           {posts.map((post) => (
             <PostCard
               key={post.id}
-              post={post}
+              post={{
+                id: post.id,
+                content: post.body,
+                kn_caption: post.kn_caption,
+                images: post.images,
+                video_url: post.video_url,
+                created_at: post.created_at,
+                user: post.user,
+                _count: {
+                  likes: post._count?.likes || 0,
+                  comments: post._count?.comments || 0,
+                },
+                isLiked: post.isLiked,
+              }}
               currentUserId={user?.id}
               onLike={handleLike}
               onComment={handleComment}

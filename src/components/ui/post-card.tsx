@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from './avatar'
 import { Button } from './button'
@@ -78,11 +77,7 @@ export function PostCard({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Avatar>
-              {/* Avatar component exposes AvatarImage and AvatarFallback from our ui/avatar.tsx */}
-              {/* Use those named exports to avoid TypeScript errors */}
-              {/* @ts-expect-error */}
               <AvatarImage src={post.user.avatar_url} />
-              {/* @ts-expect-error */}
               <AvatarFallback>{post.user.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>

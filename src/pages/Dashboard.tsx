@@ -9,10 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-
 import { CardShimmer, CropCardShimmer } from '@/components/ui/loading-shimmer';
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/animations';
 import { Sprout, TrendingUp, Users, FileText, Cloud, Leaf, MapPin, Zap, Droplets, Thermometer } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface Crop {
   id: string;
@@ -215,32 +214,29 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {quickActions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <Card
-                  className="hover:shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                  onClick={() => navigate(action.path)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className={`${action.color} p-3 rounded-full w-fit mx-auto mb-3`}>
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className="font-semibold text-sm mb-1">{action.title}</h3>
-                    <p className="text-xs text-gray-600">{action.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
+        <StaggerContainer staggerDelay={0.08}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <StaggerItem key={index}>
+                  <Card
+                    className="card-hover cursor-pointer group"
+                    onClick={() => navigate(action.path)}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className={`${action.color} p-3 rounded-full w-fit mx-auto mb-3 transition-transform group-hover:scale-110`}>
+                        <Icon className="h-6 w-6 text-white" />
+                      </div>
+                      <h3 className="font-semibold text-sm mb-1">{action.title}</h3>
+                      <p className="text-xs text-gray-600">{action.description}</p>
+                    </CardContent>
+                  </Card>
+                </StaggerItem>
+              );
+            })}
+          </div>
+        </StaggerContainer>
 
         {selectedDistrict && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -361,7 +357,7 @@ export default function Dashboard() {
               {crops.map((crop) => (
                 <Card
                   key={crop.id}
-                  className="hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
+                  className="card-hover cursor-pointer overflow-hidden group"
                   onClick={() => navigate(`/crop/${crop.name.toLowerCase()}`)}
                 >
                   {crop.image_url && (
@@ -382,7 +378,7 @@ export default function Dashboard() {
                     <CardDescription>{crop.category}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button className="w-full bg-green-600 hover:bg-green-700">
+                    <Button className="w-full btn-primary">
                       View Details
                     </Button>
                   </CardContent>
@@ -450,25 +446,28 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-none">
-          <CardHeader>
-            <CardTitle className="text-white">Need Help?</CardTitle>
-            <CardDescription className="text-white/90">
-              Our AI assistant and agricultural experts are here to assist you
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              <Button
-                variant="secondary"
-                onClick={() => navigate('/air-agent')}
-                className="bg-white text-green-600 hover:bg-gray-100"
-              >
-                Ask AI Assistant
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ScrollReveal direction="up" delay={0.3}>
+          <Card className="bg-gradient-to-r from-leaf-500 to-emerald-500 text-white border-none shadow-soft-lg">
+            <CardHeader>
+              <CardTitle className="text-white">Need Help?</CardTitle>
+              <CardDescription className="text-white/90">
+                Our AI assistant and agricultural experts are here to assist you
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate('/air-agent')}
+                  className="bg-white text-leaf-700 hover:bg-leaf-50 active:scale-95 transition-all duration-200"
+                >
+                  <Zap className="h-4 w-4 mr-2" />
+                  Ask AI Assistant
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
       </div>
     </Layout>
   );

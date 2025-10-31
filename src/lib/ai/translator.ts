@@ -1,92 +1,122 @@
-export async function translateToKannada(text: string): Promise<string> {
-  if (!text || text.trim() === '') return '';
+/**
+ * Enhanced Translation Service
+ * Supports bidirectional translation between English and Kannada
+ */
 
-  try {
-    // Use Google Translate API (free endpoint)
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=kn&dt=t&q=${encodeURIComponent(text)}`;
+export type Language = 'en' | 'kn';
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Translation API error: ${response.status}`);
+interface TranslationCache {
+  [key: string]: string;
+}
+
+class TranslationService {
+  private cache: TranslationCache = {};
+  private baseUrl = 'https://translate.googleapis.com/translate_a/single';
+
+  /**
+   * Translate text to target language
+   */
+  async translate(text: string, targetLang: Language): Promise<string> {
+    if (!text.trim()) return '';
+
+    const cacheKey = `${text}_${targetLang}`;
+    if (this.cache[cacheKey]) {
+      return this.cache[cacheKey];
     }
 
-    const data = await response.json();
+    try {
+      const sourceLang = targetLang === 'kn' ? 'en' : 'kn';
+      const url = `${this.baseUrl}?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Translation failed');
+      }
 
-    // Parse Google Translate response
-    if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
-      const translatedText = data[0]
-        .map((item: unknown[]) => item[0] as string)
-        .filter((text: string) => text)
-        .join('');
+      const data = await response.json();
+      if (Array.isArray(data) && data[0]) {
+        const translated = data[0].map((item: unknown[]) => item[0] as string).join('');
+        this.cache[cacheKey] = translated;
+        return translated;
+      }
 
-      return translatedText || text; // Fallback to original if translation fails
+      return text; // Return original if translation fails
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text; // Fallback to original text
     }
-
-    return text;
-  } catch (error) {
-    console.warn('Translation failed:', error);
-    return text; // Return original text if translation fails
   }
+
+  /**
+   * Translate to Kannada
+   */
+  async toKannada(text: string): Promise<string> {
+    return this.translate(text, 'kn');
+  }
+
+  /**
+   * Translate to English
+   */
+  async toEnglish(text: string): Promise<string> {
+    return this.translate(text, 'en');
+  }
+
+  /**
+   * Auto-detect language and translate
+   */
+  async autoTranslate(text: string): Promise<{ translated: string; detectedLang: Language }> {
+    const isKannada = this.containsKannada(text);
+    const targetLang: Language = isKannada ? 'en' : 'kn';
+    const translated = await this.translate(text, targetLang);
+    
+    return {
+      translated,
+      detectedLang: isKannada ? 'kn' : 'en',
+    };
+  }
+
+  /**
+   * Check if text contains Kannada characters
+   */
+  containsKannada(text: string): boolean {
+    const kannadaRegex = /[\u0C80-\u0CFF]/;
+    return kannadaRegex.test(text);
+  }
+
+  /**
+   * Detect language of text
+   */
+  detectLanguage(text: string): Language {
+    return this.containsKannada(text) ? 'kn' : 'en';
+  }
+
+  /**
+   * Clear translation cache
+   */
+  clearCache(): void {
+    this.cache = {};
+  }
+
+  /**
+   * Get cache size
+   */
+  getCacheSize(): number {
+    return Object.keys(this.cache).length;
+  }
+}
+
+// Export singleton instance
+export const translationService = new TranslationService();
+
+// Helper functions for backward compatibility
+export async function translateToKannada(text: string): Promise<string> {
+  return translationService.toKannada(text);
 }
 
 export async function translateToEnglish(text: string): Promise<string> {
-  if (!text || text.trim() === '') return '';
-
-  try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=kn&tl=en&dt=t&q=${encodeURIComponent(text)}`;
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Translation API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
-      const translatedText = data[0]
-        .map((item: unknown[]) => item[0] as string)
-        .filter((text: string) => text)
-        .join('');
-
-      return translatedText || text;
-    }
-
-    return text;
-  } catch (error) {
-    console.warn('Translation failed:', error);
-    return text;
-  }
+  return translationService.toEnglish(text);
 }
 
-export async function translateText(text: string, targetLang: 'en' | 'kn'): Promise<string> {
-  if (targetLang === 'kn') {
-    return translateToKannada(text);
-  } else {
-    return translateToEnglish(text);
-  }
-}
-
-// Batch translation for multiple texts
-export async function translateBatch(texts: string[], targetLang: 'en' | 'kn'): Promise<string[]> {
-  const promises = texts.map(text => translateText(text, targetLang));
-  return Promise.all(promises);
-}
-
-// Detect if text contains Kannada characters
 export function containsKannada(text: string): boolean {
-  const kannadaRegex = /[\u0C80-\u0CFF]/;
-  return kannadaRegex.test(text);
-}
-
-// Smart translation - only translate if needed
-export async function smartTranslate(text: string, targetLang: 'en' | 'kn'): Promise<string> {
-  const hasKannada = containsKannada(text);
-
-  if (targetLang === 'kn' && !hasKannada) {
-    return translateToKannada(text);
-  } else if (targetLang === 'en' && hasKannada) {
-    return translateToEnglish(text);
-  }
-
-  return text; // Already in target language
+  return translationService.containsKannada(text);
 }
