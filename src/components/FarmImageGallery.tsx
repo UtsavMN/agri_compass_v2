@@ -2,7 +2,6 @@ import { useState, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { FarmsAPI, FarmImage } from '@/lib/api/farms'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -13,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { Camera, Upload, ImageIcon } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface FarmImageGalleryProps {

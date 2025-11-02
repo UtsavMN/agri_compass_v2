@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useToast } from '@/hooks/use-toast'
-import { MessageCircle, Send, Heart } from 'lucide-react'
+import { MessageCircle, Send } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface CommentSectionProps {
@@ -27,7 +27,7 @@ export default function CommentSection({ postId, commentsCount, onCommentsCountC
     if (isExpanded && comments.length === 0) {
       loadComments()
     }
-  }, [isExpanded])
+  }, [isExpanded, comments.length])
 
   const loadComments = async () => {
     try {

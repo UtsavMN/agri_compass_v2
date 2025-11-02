@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { translateToKannada } from '@/lib/translator'
 import { PostsAPI, Post } from '@/lib/api/posts'
 import Layout from '@/components/Layout'
 import { Button } from '@/components/ui/button'
@@ -10,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea'
 import { PostCard } from '@/components/ui/post-card'
 import { useToast } from '@/hooks/use-toast'
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/animations'
+import { LottieEmptyState } from '@/components/ui/lottie-loading'
 import { Plus, ImagePlus, Video } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 
@@ -249,34 +250,45 @@ export default function Community() {
           </DialogContent>
         </Dialog>
 
-        <div className="grid gap-4">
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={{
-                id: post.id,
-                content: post.body,
-                kn_caption: post.kn_caption,
-                images: post.images,
-                video_url: post.video_url,
-                created_at: post.created_at,
-                user: post.user,
-                _count: {
-                  likes: post._count?.likes || 0,
-                  comments: post._count?.comments || 0,
-                },
-                isLiked: post.isLiked,
-              }}
-              currentUserId={user?.id}
-              onLike={handleLike}
-              onComment={handleComment}
-              onDelete={handleDeletePost}
-              onShare={(postId: string) => {
-                navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`)
-              }}
-            />
-          ))}
-        </div>
+        <ScrollReveal direction="up" delay={0.1}>
+          {posts.length > 0 ? (
+            <StaggerContainer staggerDelay={0.05}>
+              <div className="grid gap-4">
+                {posts.map((post) => (
+                  <StaggerItem key={post.id}>
+                    <div className="card-mobile">
+                      <PostCard
+                            post={{
+                              id: post.id,
+                              content: post.body || post.content || '',
+                              kn_caption: post.kn_caption || undefined,
+                              images: post.images,
+                              video_url: post.video_url ?? undefined,
+                              created_at: post.created_at,
+                              user: post.user,
+                              _count: {
+                                likes: post._count?.likes || 0,
+                                comments: post._count?.comments || 0,
+                              },
+                              isLiked: post.isLiked,
+                            }}
+                        currentUserId={user?.id}
+                        onLike={handleLike}
+                        onComment={handleComment}
+                        onDelete={handleDeletePost}
+                        onShare={(postId: string) => {
+                          navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`)
+                        }}
+                      />
+                    </div>
+                  </StaggerItem>
+                ))}
+              </div>
+            </StaggerContainer>
+          ) : (
+            <LottieEmptyState message="No posts yet. Be the first to share something!" />
+          )}
+        </ScrollReveal>
 
         {/* Floating create post button */}
         <button

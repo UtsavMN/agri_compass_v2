@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { X, Upload, Image as ImageIcon, MapPin, Sprout } from 'lucide-react'
+import { X, Upload, MapPin, Sprout } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 
 interface CreatePostModalProps {

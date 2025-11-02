@@ -6,17 +6,15 @@ import { cropRecommender, DetailedCropData } from '@/lib/ai/cropRecommender';
 import { PostsAPI, Post } from '@/lib/api/posts';
 import Layout from '@/components/Layout';
 import Onboarding from '@/components/Onboarding';
-import CreatePostModal from '@/components/CreatePostModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PostCard } from '@/components/ui/post-card';
 import { PostListSkeleton } from '@/components/ui/post-skeleton';
 import { CropCard } from '@/components/ui/crop-card';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollReveal, StaggerContainer, StaggerItem, FadeIn } from '@/components/ui/animations';
-import { Sprout, Search, Plus, MessageCircle, Heart, Globe, MapPin, Leaf, TrendingUp, FileText, Users, HelpCircle, Cloud, Filter } from 'lucide-react';
+import { Sprout, Search, Plus, MessageCircle, Heart, Globe, Leaf, TrendingUp, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Home() {
@@ -33,11 +31,13 @@ export default function Home() {
   const [detailedCrops, setDetailedCrops] = useState<DetailedCropData[]>([]);
   const [cropsLoading, setCropsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
+
 
   useEffect(() => {
     // Check if onboarding should be shown
     const onboardingCompleted = localStorage.getItem('onboarding_completed');
+    if (!onboardingCompleted) {
+      setShowOnboarding(true);
     }
 
     loadPosts();
@@ -368,7 +368,7 @@ export default function Home() {
               ) : (
                 <StaggerContainer>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {detailedCrops.map((crop, index) => (
+                    {detailedCrops.map((crop) => (
                       <StaggerItem key={crop.crop}>
                         <CropCard
                           crop={crop}
@@ -411,15 +411,15 @@ export default function Home() {
                 </ScrollReveal>
               ) : (
                 <StaggerContainer staggerDelay={0.1}>
-                  {posts.map((post, index) => (
+                  {posts.map((post) => (
                     <StaggerItem key={post.id}>
                       <PostCard
                         post={{
                           id: post.id,
                           content: post.body || post.content || '',
-                          kn_caption: post.kn_caption,
+                          kn_caption: post.kn_caption || undefined,
                           images: post.images,
-                          video_url: post.video_url,
+                          video_url: post.video_url ?? undefined,
                           created_at: post.created_at,
                           user: post.user,
                           _count: post._count,

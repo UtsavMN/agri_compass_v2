@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { FarmsAPI, WeatherLog } from '@/lib/api/farms'
 import { Button } from '@/components/ui/button'
@@ -37,13 +37,8 @@ export default function FarmWeatherModal({ farmId, farmName, isOpen, onClose }: 
     conditions: ''
   })
 
-  useEffect(() => {
-    if (isOpen && farmId) {
-      loadWeatherLogs()
-    }
-  }, [isOpen, farmId])
-
-  const loadWeatherLogs = async () => {
+  // Stable callback for loading logs
+  const loadWeatherLogs = useCallback(async () => {
     try {
       setIsLoading(true)
       const data = await FarmsAPI.getWeatherLogs(farmId)
@@ -58,7 +53,13 @@ export default function FarmWeatherModal({ farmId, farmName, isOpen, onClose }: 
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [farmId, toast])
+
+  useEffect(() => {
+    if (isOpen && farmId) {
+      loadWeatherLogs()
+    }
+  }, [isOpen, farmId, loadWeatherLogs])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

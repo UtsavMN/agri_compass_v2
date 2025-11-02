@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { AIAPI } from '@/lib/api/ai'
 import { FarmsAPI, Farm } from '@/lib/api/farms'
@@ -34,11 +34,20 @@ export default function AIChatInterface({ selectedFarmId, onFarmSelect }: AIChat
   const [currentFarmId, setCurrentFarmId] = useState<string>(selectedFarmId || '')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  const loadFarms = useCallback(async () => {
+    try {
+      const userFarms = await FarmsAPI.getFarms(user?.id || '')
+      setFarms(userFarms)
+    } catch (error) {
+      console.error('Error loading farms:', error)
+    }
+  }, [user?.id])
+
   useEffect(() => {
     if (user) {
       loadFarms()
     }
-  }, [user])
+  }, [user, loadFarms])
 
   useEffect(() => {
     if (selectedFarmId) {
@@ -50,14 +59,7 @@ export default function AIChatInterface({ selectedFarmId, onFarmSelect }: AIChat
     scrollToBottom()
   }, [messages])
 
-  const loadFarms = async () => {
-    try {
-      const userFarms = await FarmsAPI.getFarms(user?.id || '')
-      setFarms(userFarms)
-    } catch (error) {
-      console.error('Error loading farms:', error)
-    }
-  }
+  // `loadFarms` is defined above with useCallback; avoid redeclaration here.
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -155,6 +157,7 @@ export default function AIChatInterface({ selectedFarmId, onFarmSelect }: AIChat
       setMessages(prev => [...prev, assistantMessage])
 
     } catch (error) {
+      console.error('Retry error:', error)
       const errorMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',

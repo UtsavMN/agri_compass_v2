@@ -1,5 +1,6 @@
 // API endpoints for posts management
 import { supabase } from '@/lib/supabase'
+import { PostsCache, NetworkUtils } from '@/lib/cache'
 
 export interface Post {
   id: string
@@ -12,6 +13,8 @@ export interface Post {
   images?: string[]
   created_at: string
   updated_at?: string
+  kn_caption?: string | null
+  video_url?: string | null
   user: {
     id: string
     username: string
@@ -49,13 +52,27 @@ export interface Notification {
 }
 
 export class PostsAPI {
-  // GET /api/posts - Retrieve all posts in reverse chronological order with filters
+  // GET /api/posts - Retrieve all posts in reverse chronological order with filters and caching
   static async getPosts(filters?: {
     crop?: string
     location?: string
     user?: string
     q?: string
   }): Promise<Post[]> {
+  // NOTE: cacheKey previously declared but unused; cache uses filters directly.
+
+    // Try cache first
+    const cached = PostsCache.getFeed(filters);
+    if (cached) {
+      return cached;
+    }
+
+    // Check network status
+    if (!NetworkUtils.isOnline()) {
+      console.warn('No internet connection, cannot fetch posts');
+      return [];
+    }
+
     try {
       let query = supabase
         .from('posts')
@@ -86,10 +103,16 @@ export class PostsAPI {
         query = query.or(`body.ilike.%${filters.q}%,title.ilike.%${filters.q}%`)
       }
 
-      let { data, error } = await query
+      const res = await NetworkUtils.retryWithBackoff(async () => {
+        const result = await query;
+        if (result.error) throw result.error;
+        return result;
+      }, 3, 1000);
+      let data = res.data;
+      const error = res.error;
 
-      // If posts table doesn't exist, try community_posts
-      if (error && error.message?.includes('relation "public.posts" does not exist')) {
+  // If posts table doesn't exist, try community_posts
+  if (error && (error as any).message?.includes('relation "public.posts" does not exist')) {
         let fallbackQuery = supabase
           .from('community_posts')
           .select(`
@@ -119,18 +142,29 @@ export class PostsAPI {
           fallbackQuery = fallbackQuery.or(`content.ilike.%${filters.q}%,title.ilike.%${filters.q}%`)
         }
 
-        const { data: fallbackData, error: fallbackError } = await fallbackQuery
+        const res2 = await NetworkUtils.retryWithBackoff(async () => {
+          const result = await fallbackQuery;
+          if (result.error) throw result.error;
+          return result;
+        }, 3, 1000);
+        const fallbackData = res2.data;
+        const fallbackError = res2.error;
 
-        if (fallbackError) throw fallbackError
-        data = fallbackData
+        if (fallbackError) throw fallbackError;
+        data = fallbackData;
       } else if (error) {
-        throw error
+        throw error;
       }
 
-      return data || []
+      const posts = data || [];
+
+      // Cache the successful response
+      PostsCache.setFeed(filters, posts);
+
+      return posts;
     } catch (error) {
-      console.error('Error fetching posts:', error)
-      throw error
+      console.error('Error fetching posts:', error);
+      throw error;
     }
   }
 
@@ -142,10 +176,11 @@ export class PostsAPI {
     crop_tags?: string[]
     location?: string
     images?: string[]
+    farm_id?: string
   }): Promise<Post> {
     try {
       // Try posts table first
-      let { data, error } = await supabase
+      const res3 = await supabase
         .from('posts')
         .insert([postData])
         .select(`
@@ -158,9 +193,11 @@ export class PostsAPI {
           )
         `)
         .single()
+      let data = res3.data;
+      const error = res3.error;
 
-      // If posts table doesn't exist, try community_posts
-      if (error && error.message?.includes('relation "public.posts" does not exist')) {
+  // If posts table doesn't exist, try community_posts
+  if (error && (error as any).message?.includes('relation "public.posts" does not exist')) {
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('community_posts')
           .insert([{

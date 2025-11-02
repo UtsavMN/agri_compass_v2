@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { FarmsAPI, Farm, FarmImage } from '@/lib/api/farms'
-import { PostsAPI } from '@/lib/api/posts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,7 +28,7 @@ import {
   CheckCircle
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { format, differenceInDays } from 'date-fns'
+import { differenceInDays } from 'date-fns'
 
 interface FarmCardProps {
   farm: Farm

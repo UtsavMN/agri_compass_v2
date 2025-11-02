@@ -50,7 +50,8 @@ const CHART_COLORS = [
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  // Generic payload entries from Recharts - keep as unknown and narrow below
+  payload?: Record<string, unknown>[];
   label?: string;
   currency?: string;
   unit?: string;
@@ -61,20 +62,26 @@ function CustomTooltip({ active, payload, label, currency, unit }: CustomTooltip
     return (
       <div className="bg-white border border-slate-200 rounded-lg shadow-lg p-3">
         <p className="text-sm font-semibold text-slate-900 mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center gap-2 text-sm">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-slate-600">{entry.name}:</span>
-            <span className="font-semibold text-slate-900">
-              {currency && currency}
-              {entry.value}
-              {unit && unit}
-            </span>
-          </div>
-        ))}
+        {payload.map((entry, index: number) => {
+          const ev = entry as Record<string, unknown>;
+          const color = String(ev['color'] ?? '');
+          const name = String(ev['name'] ?? '');
+          const value = ev['value'] ?? '';
+          return (
+            <div key={index} className="flex items-center gap-2 text-sm">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-slate-600">{name}:</span>
+              <span className="font-semibold text-slate-900">
+                {currency && currency}
+                {String(value)}
+                {unit && unit}
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -413,6 +420,7 @@ export function CombinedWeatherChart({
 // ============================================
 
 interface MarketData {
+  [key: string]: unknown;
   name: string;
   value: number;
 }
@@ -428,14 +436,8 @@ export function MarketShareChart({
   height?: number;
 }) {
   const RADIAN = Math.PI / 180;
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-  }: any) => {
+  const renderCustomizedLabel = (props: any) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);

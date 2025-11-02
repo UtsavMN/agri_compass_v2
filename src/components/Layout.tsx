@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import {
   Sun,
   Moon,
   X,
+  Languages,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -36,6 +38,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { user, profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,13 +49,13 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/my-farm', label: 'MyFarm', icon: Sprout },
-    { path: '/market-prices', label: 'Market Prices', icon: TrendingUp },
-    { path: '/schemes', label: 'Gov Schemes', icon: FileText },
-    { path: '/air-agent', label: 'AI Agent', icon: HelpCircle },
-    { path: '/weather', label: 'Weather', icon: Cloud },
+    { path: '/', label: t('nav.community'), icon: Home },
+    { path: '/dashboard', label: t('nav.dashboard'), icon: Home },
+    { path: '/my-farm', label: t('nav.myFarm'), icon: Sprout },
+    { path: '/market-prices', label: t('nav.marketPrices'), icon: TrendingUp },
+    { path: '/schemes', label: t('nav.govSchemes'), icon: FileText },
+    { path: '/air-agent', label: t('nav.aiAgent'), icon: HelpCircle },
+    { path: '/weather', label: t('nav.weather'), icon: Cloud },
   ];
 
   if (!user) {
@@ -96,7 +99,7 @@ export default function Layout({ children }: LayoutProps) {
                       <Button
                         variant={isActive ? 'default' : 'ghost'}
                         size="sm"
-                        className={`transition-all duration-200 ${
+                        className={`transition-all duration-200 mobile-touch-target ${
                           isActive
                             ? 'btn-primary'
                             : theme === 'dark'
@@ -113,19 +116,35 @@ export default function Layout({ children }: LayoutProps) {
               </div>
 
               <div className="flex items-center space-x-2">
-                {/* Theme Toggle */}
+                {/* Language Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleLanguage}
+                  className={`rounded-full transition-all duration-200 mobile-touch-target ${
+                    theme === 'dark' ? 'hover:bg-slate-700' : 'hover:bg-leaf-50'
+                  }`}
+                  title={t('common.languageToggle')}
+                >
+                  <Languages className="h-5 w-5" />
+                </Button>
+
+                {/* Theme Toggle - Made more prominent with enhanced styling */}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={toggleTheme}
-                  className={`rounded-full transition-all duration-200 ${
-                    theme === 'dark' ? 'hover:bg-slate-700' : 'hover:bg-leaf-50'
+                  className={`rounded-full transition-all duration-300 mobile-touch-target border-2 ${
+                    theme === 'dark'
+                      ? 'hover:bg-slate-700 border-slate-600 hover:border-slate-500'
+                      : 'hover:bg-leaf-50 border-leaf-200 hover:border-leaf-300'
                   }`}
+                  title={theme === 'dark' ? t('common.switchToLight') : t('common.switchToDark')}
                 >
                   {theme === 'dark' ? (
-                    <Sun className="h-5 w-5 text-yellow-400" />
+                    <Sun className="h-5 w-5 text-yellow-400 animate-pulse-soft" />
                   ) : (
-                    <Moon className="h-5 w-5 text-slate-600" />
+                    <Moon className="h-5 w-5 text-slate-600 animate-bounce-gentle" />
                   )}
                 </Button>
 
@@ -148,11 +167,11 @@ export default function Layout({ children }: LayoutProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" />
-                      Profile
+                      {t('nav.profile')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      {t('auth.signOut')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -193,7 +212,7 @@ export default function Layout({ children }: LayoutProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-lg font-semibold">Menu</h2>
+                <h2 className="text-lg font-semibold">{t('nav.community')}</h2>
                 <Button
                   variant="ghost"
                   size="icon"

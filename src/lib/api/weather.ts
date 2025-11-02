@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { WeatherAdvisor, WeatherData, WeatherAdvice } from '@/lib/ai/weatherAdvisor'
+import { WeatherCache, NetworkUtils } from '@/lib/cache'
 
 export interface WeatherResponse {
   district: string
@@ -23,25 +24,47 @@ export interface WeatherLog {
 export class WeatherAPI {
   private static weatherAdvisor = new WeatherAdvisor()
 
-  // GET /api/weather/:district - Get current weather and advisory
+  // GET /api/weather/:district - Get current weather and advisory with caching
   static async getWeatherForDistrict(district: string): Promise<WeatherResponse | null> {
+    const cacheKey = `weather_${district}`;
+
+    // Try cache first
+    const cached = WeatherCache.getWeather(district);
+    if (cached) {
+      return cached;
+    }
+
+    // Check network status
+    if (!NetworkUtils.isOnline()) {
+      console.warn('No internet connection, cannot fetch weather data');
+      return null;
+    }
+
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
-      const response = await fetch(`/api/weather/${encodeURIComponent(district)}`, {
-        method: 'GET',
-        signal: controller.signal
-      })
+      const response = await NetworkUtils.retryWithBackoff(async () => {
+        const res = await fetch(`/api/weather/${encodeURIComponent(district)}`, {
+          method: 'GET',
+          signal: controller.signal
+        });
+
+        if (!res.ok) {
+          throw new Error(`Weather API error: ${res.status}`);
+        }
+
+        return res;
+      }, 3, 1000);
 
       clearTimeout(timeoutId)
 
-      if (!response.ok) {
-        throw new Error(`Weather API error: ${response.status}`)
-      }
+      const data = await response.json();
 
-      const data = await response.json()
-      return data
+      // Cache the successful response
+      WeatherCache.setWeather(district, data);
+
+      return data;
 
     } catch (error) {
       console.error('Weather API fetch error:', error)
@@ -51,12 +74,17 @@ export class WeatherAPI {
         const weatherData = await this.weatherAdvisor.getWeatherData(district)
         if (weatherData) {
           const advisory = await this.weatherAdvisor.getFarmingAdvice(weatherData, district)
-          return {
+          const fallbackData = {
             district,
             weather: weatherData,
             advisory,
             timestamp: new Date().toISOString()
-          }
+          };
+
+          // Cache fallback data with shorter TTL
+          WeatherCache.setWeather(district, fallbackData);
+
+          return fallbackData;
         }
       } catch (fallbackError) {
         console.error('Weather fallback error:', fallbackError)

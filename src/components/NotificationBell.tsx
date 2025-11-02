@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { PostsAPI, Notification } from '@/lib/api/posts'
 import { Button } from '@/components/ui/button'
@@ -19,16 +19,8 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    if (user) {
-      loadNotifications()
-      // Poll for new notifications every 30 seconds
-      const interval = setInterval(loadNotifications, 30000)
-      return () => clearInterval(interval)
-    }
-  }, [user])
-
-  const loadNotifications = async () => {
+  // Stable callback so effect dependencies remain stable
+  const loadNotifications = useCallback(async () => {
     if (!user) return
 
     try {
@@ -41,7 +33,16 @@ export default function NotificationBell() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      loadNotifications()
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(loadNotifications, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [user, loadNotifications])
 
   const markAsRead = async (notificationId: string) => {
     try {

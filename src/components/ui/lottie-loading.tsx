@@ -1,5 +1,4 @@
 import Lottie from 'lottie-react';
-import { useEffect, useState } from 'react';
 
 // Simple loading animation data (inline to avoid external dependencies)
 const loadingAnimationData = {

@@ -104,7 +104,7 @@ export class WeatherAdvisor {
     return coordinates[district] || null;
   }
 
-  private getMockWeatherData(): WeatherData {
+  private getMockWeatherData(_: string | undefined = undefined): WeatherData {
     const today = new Date();
     return {
       temperature: 28 + Math.floor(Math.random() * 10),

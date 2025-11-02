@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,17 +18,8 @@ export default function WeatherCard({ district, farmId, compact = false }: Weath
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadWeatherData()
-  }, [district])
-
-  useEffect(() => {
-    if (farmId) {
-      loadWeatherHistory()
-    }
-  }, [farmId])
-
-  const loadWeatherData = async () => {
+  // Hoist these helpers so effects can safely reference them
+  const loadWeatherData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -50,9 +41,9 @@ export default function WeatherCard({ district, farmId, compact = false }: Weath
     } finally {
       setLoading(false)
     }
-  }
+  }, [district, farmId])
 
-  const loadWeatherHistory = async () => {
+  const loadWeatherHistory = useCallback(async () => {
     if (!farmId) return
 
     try {
@@ -61,7 +52,17 @@ export default function WeatherCard({ district, farmId, compact = false }: Weath
     } catch (err) {
       console.error('Error loading weather history:', err)
     }
-  }
+  }, [farmId])
+
+  useEffect(() => {
+    loadWeatherData()
+  }, [district, loadWeatherData])
+
+  useEffect(() => {
+    if (farmId) {
+      loadWeatherHistory()
+    }
+  }, [farmId, loadWeatherHistory])
 
   const getWeatherIcon = (description: string) => {
     const desc = description.toLowerCase()
@@ -192,7 +193,7 @@ export default function WeatherCard({ district, farmId, compact = false }: Weath
                 <span className="text-sm font-medium text-gray-700">7-Day Trend</span>
               </div>
               <div className="flex gap-1 overflow-x-auto pb-2">
-                {weatherHistory.slice(0, 7).reverse().map((log, index) => (
+                {weatherHistory.slice(0, 7).reverse().map((log) => (
                   <div
                     key={log.id}
                     className="flex-shrink-0 text-center min-w-[40px]"

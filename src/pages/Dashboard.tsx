@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { CardShimmer, CropCardShimmer } from '@/components/ui/loading-shimmer';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/animations';
+import { LottieEmptyState } from '@/components/ui/lottie-loading';
 import { Sprout, TrendingUp, Users, FileText, Cloud, Leaf, MapPin, Zap, Droplets, Thermometer } from 'lucide-react';
 
 interface Crop {
@@ -239,154 +240,163 @@ export default function Dashboard() {
         </StaggerContainer>
 
         {selectedDistrict && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Weather Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Cloud className="h-5 w-5 mr-2 text-blue-600" />
-                  Weather in {selectedDistrict}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {weatherData ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Thermometer className="h-4 w-4 text-red-500" />
-                        <span className="text-2xl font-bold">{weatherData.temperature}°C</span>
-                      </div>
-                      <Badge variant="secondary">{weatherData.description}</Badge>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Droplets className="h-4 w-4 text-blue-500" />
-                        <span>Humidity: {weatherData.humidity}%</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Cloud className="h-4 w-4 text-gray-500" />
-                        <span>Wind: {weatherData.windSpeed} km/h</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-2">5-Day Forecast</h4>
-                      <div className="space-y-2">
-                        {weatherData.forecast.slice(0, 3).map((day, index) => (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span>{new Date(day.date).toLocaleDateString('en-IN', { weekday: 'short' })}</span>
-                            <span>{day.temp_min}° - {day.temp_max}°</span>
-                            <span>{day.description}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <CardShimmer />
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Crop Recommendations Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Leaf className="h-5 w-5 mr-2 text-green-600" />
-                  Recommended Crops for {selectedDistrict}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {cropRecommendations.length > 0 ? (
-                  <div className="space-y-4">
-                    {cropRecommendations.slice(0, 4).map((rec, index) => {
-                      const districtInfo = districtData.find(d => d.district === selectedDistrict);
-                      const recommendedCrops = districtInfo?.recommended_crops?.split(', ') || [];
-                      const isRecommended = recommendedCrops.includes(rec.cropName);
-
-                      return (
-                        <div key={index} className="border rounded-lg p-4 bg-green-50/50">
-                          <div className="flex justify-between items-start mb-3">
-                            <h4 className="font-semibold text-green-800 text-lg">{rec.cropName}</h4>
-                            <div className="flex gap-2">
-                              {isRecommended && <Badge variant="default" className="bg-green-600">Recommended</Badge>}
-                              <Badge variant="outline">{rec.season}</Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
-                          <p className="text-sm text-green-600 font-medium mb-3">Expected: {rec.expectedYield}</p>
-
-                          {/* District-specific information from CSV */}
-                          {districtInfo && (
-                            <div className="space-y-2 text-sm">
-                              <div>
-                                <span className="font-medium text-gray-700">Soil Type:</span>
-                                <p className="text-gray-600 mt-1">{districtInfo.soil_type}</p>
-                              </div>
-                              <div>
-                                <span className="font-medium text-gray-700">Average Rainfall:</span>
-                                <p className="text-gray-600 mt-1">{districtInfo.avg_rainfall}</p>
-                              </div>
-                              <div>
-                                <span className="font-medium text-gray-700">Weather Pattern:</span>
-                                <p className="text-gray-600 mt-1">{districtInfo.weather_pattern}</p>
-                              </div>
-                            </div>
-                          )}
+          <ScrollReveal direction="up" delay={0.1}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Weather Card */}
+              <Card className="card-mobile">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Cloud className="h-5 w-5 mr-2 text-blue-600" />
+                    Weather in {selectedDistrict}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {weatherData ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Thermometer className="h-4 w-4 text-red-500" />
+                          <span className="text-2xl font-bold">{weatherData.temperature}°C</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <CardShimmer />
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                        <Badge variant="secondary">{weatherData.description}</Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Droplets className="h-4 w-4 text-blue-500" />
+                          <span>Humidity: {weatherData.humidity}%</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Cloud className="h-4 w-4 text-gray-500" />
+                          <span>Wind: {weatherData.windSpeed} km/h</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-2">5-Day Forecast</h4>
+                        <div className="space-y-2">
+                          {weatherData.forecast.slice(0, 3).map((day, index) => (
+                            <div key={index} className="flex justify-between text-sm">
+                              <span>{new Date(day.date).toLocaleDateString('en-IN', { weekday: 'short' })}</span>
+                              <span>{day.temp_min}° - {day.temp_max}°</span>
+                              <span>{day.description}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <CardShimmer />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Crop Recommendations Card */}
+              <Card className="card-mobile">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Leaf className="h-5 w-5 mr-2 text-green-600" />
+                    Recommended Crops for {selectedDistrict}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {cropRecommendations.length > 0 ? (
+                    <div className="space-y-4">
+                      {cropRecommendations.slice(0, 4).map((rec, index) => {
+                        const districtInfo = districtData.find(d => d.district === selectedDistrict);
+                        const recommendedCrops = districtInfo?.recommended_crops?.split(', ') || [];
+                        const isRecommended = recommendedCrops.includes(rec.cropName);
+
+                        return (
+                          <div key={index} className="border rounded-lg p-4 bg-green-50/50">
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-semibold text-green-800 text-lg">{rec.cropName}</h4>
+                              <div className="flex gap-2">
+                                {isRecommended && <Badge variant="default" className="bg-green-600">Recommended</Badge>}
+                                <Badge variant="outline">{rec.season}</Badge>
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
+                            <p className="text-sm text-green-600 font-medium mb-3">Expected: {rec.expectedYield}</p>
+
+                            {/* District-specific information from CSV */}
+                            {districtInfo && (
+                              <div className="space-y-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-gray-700">Soil Type:</span>
+                                  <p className="text-gray-600 mt-1">{districtInfo.soil_type}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-700">Average Rainfall:</span>
+                                  <p className="text-gray-600 mt-1">{districtInfo.avg_rainfall}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-700">Weather Pattern:</span>
+                                  <p className="text-gray-600 mt-1">{districtInfo.weather_pattern}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <CardShimmer />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </ScrollReveal>
         )}
 
 
 
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Popular Crops</h2>
-          {loading ? (
-            <CropCardShimmer count={6} />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {crops.map((crop) => (
-                <Card
-                  key={crop.id}
-                  className="card-hover cursor-pointer overflow-hidden group"
-                  onClick={() => navigate(`/crop/${crop.name.toLowerCase()}`)}
-                >
-                  {crop.image_url && (
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={crop.image_url}
-                        alt={crop.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Leaf className="h-5 w-5 mr-2 text-green-600" />
-                      {crop.name}
-                    </CardTitle>
-                    <CardDescription>{crop.category}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button className="w-full btn-primary">
-                      View Details
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+        <ScrollReveal direction="up" delay={0.2}>
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Popular Crops</h2>
+            {loading ? (
+              <CropCardShimmer count={6} />
+            ) : crops.length > 0 ? (
+              <StaggerContainer staggerDelay={0.05}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {crops.map((crop) => (
+                    <StaggerItem key={crop.id}>
+                      <Card
+                        className="card-hover cursor-pointer overflow-hidden group card-mobile"
+                        onClick={() => navigate(`/crop/${crop.name.toLowerCase()}`)}
+                      >
+                        {crop.image_url && (
+                          <div className="h-48 overflow-hidden">
+                            <img
+                              src={crop.image_url}
+                              alt={crop.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <Leaf className="h-5 w-5 mr-2 text-green-600" />
+                            {crop.name}
+                          </CardTitle>
+                          <CardDescription>{crop.category}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Button className="w-full btn-primary">
+                            View Details
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </StaggerItem>
+                  ))}
+                </div>
+              </StaggerContainer>
+            ) : (
+              <LottieEmptyState message="No crops available at the moment" />
+            )}
+          </div>
+        </ScrollReveal>
 
         {/* District-wise Crop Recommendations */}
         <Card>

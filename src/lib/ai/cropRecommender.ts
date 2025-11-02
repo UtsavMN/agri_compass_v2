@@ -76,7 +76,7 @@ export class CropRecommender {
 
   private parseCSV(csvText: string): DistrictData[] {
     const lines = csvText.split('\n').filter(line => line.trim());
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  // headers not needed — parse values by position
 
     return lines.slice(1).map(line => {
       const values = line.split(',').map(v => v.trim());
@@ -192,7 +192,7 @@ export class CropRecommender {
     const lines = csvText.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  // headers not needed — parse values by position
 
     return lines.slice(1).map(line => {
       const values = line.split(',').map(v => v.trim());

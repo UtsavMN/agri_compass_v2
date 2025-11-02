@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { CardShimmer } from '@/components/ui/loading-shimmer';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Sprout, MapPin, Ruler, Droplet, Trash2, Cloud, Thermometer, Wind, Eye, Gauge, Sun, CloudRain, Zap } from 'lucide-react';
+import { Plus, Sprout, MapPin, Ruler, Droplet, Trash2, Cloud, Thermometer, Wind, CloudRain } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Farm {

@@ -8,10 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollReveal, FadeIn } from '@/components/ui/animations';
-import { TrendingUp, MapPin, Calendar, Search, BarChart3, Filter, Globe, ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
+import { TrendingUp, Calendar, Search, BarChart3, Filter, Globe, DollarSign } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { motion } from 'framer-motion';
-import { MiniSparkline } from '@/components/ui/charts';
+// Removed unused `motion` and `MiniSparkline` imports (not used in this file)
 
 interface MarketPrice {
   id: string;
