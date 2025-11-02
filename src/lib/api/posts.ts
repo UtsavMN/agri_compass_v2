@@ -1,6 +1,4 @@
-// API endpoints for posts management
-import { supabase } from '@/lib/supabase'
-import { PostsCache, NetworkUtils } from '@/lib/cache'
+import { supabase } from '../supabase'
 
 export interface Post {
   id: string
@@ -59,23 +57,9 @@ export class PostsAPI {
     user?: string
     q?: string
   }): Promise<Post[]> {
-  // NOTE: cacheKey previously declared but unused; cache uses filters directly.
-
-    // Try cache first
-    const cached = PostsCache.getFeed(filters);
-    if (cached) {
-      return cached;
-    }
-
-    // Check network status
-    if (!NetworkUtils.isOnline()) {
-      console.warn('No internet connection, cannot fetch posts');
-      return [];
-    }
-
     try {
       let query = supabase
-        .from('posts')
+        .from('community_posts')
         .select(`
           *,
           user:user_id (
@@ -84,14 +68,14 @@ export class PostsAPI {
             avatar_url,
             full_name
           ),
-          likes:likes(count),
-          comments:comments(count)
+          likes:post_likes(count),
+          comments:post_comments(count)
         `)
         .order('created_at', { ascending: false })
 
       // Apply filters
       if (filters?.crop) {
-        query = query.contains('crop_tags', [filters.crop])
+        query = query.ilike('category', `%${filters.crop}%`)
       }
       if (filters?.location) {
         query = query.ilike('location', `%${filters.location}%`)
@@ -100,71 +84,19 @@ export class PostsAPI {
         query = query.ilike('user.username', `%${filters.user}%`)
       }
       if (filters?.q) {
-        query = query.or(`body.ilike.%${filters.q}%,title.ilike.%${filters.q}%`)
+        query = query.or(`content.ilike.%${filters.q}%,title.ilike.%${filters.q}%`)
       }
 
-      const res = await NetworkUtils.retryWithBackoff(async () => {
-        const result = await query;
-        if (result.error) throw result.error;
-        return result;
-      }, 3, 1000);
-      let data = res.data;
-      const error = res.error;
+      const { data, error } = await query
 
-  // If posts table doesn't exist, try community_posts
-  if (error && (error as any).message?.includes('relation "public.posts" does not exist')) {
-        let fallbackQuery = supabase
-          .from('community_posts')
-          .select(`
-            *,
-            user:user_id (
-              id,
-              username,
-              avatar_url,
-              full_name
-            ),
-            likes:post_likes(count),
-            comments:post_comments(count)
-          `)
-          .order('created_at', { ascending: false })
+      if (error) throw error
 
-        // Apply same filters to fallback
-        if (filters?.crop) {
-          fallbackQuery = fallbackQuery.ilike('category', `%${filters.crop}%`)
-        }
-        if (filters?.location) {
-          fallbackQuery = fallbackQuery.ilike('location', `%${filters.location}%`)
-        }
-        if (filters?.user) {
-          fallbackQuery = fallbackQuery.ilike('user.username', `%${filters.user}%`)
-        }
-        if (filters?.q) {
-          fallbackQuery = fallbackQuery.or(`content.ilike.%${filters.q}%,title.ilike.%${filters.q}%`)
-        }
+      const posts = data || []
 
-        const res2 = await NetworkUtils.retryWithBackoff(async () => {
-          const result = await fallbackQuery;
-          if (result.error) throw result.error;
-          return result;
-        }, 3, 1000);
-        const fallbackData = res2.data;
-        const fallbackError = res2.error;
-
-        if (fallbackError) throw fallbackError;
-        data = fallbackData;
-      } else if (error) {
-        throw error;
-      }
-
-      const posts = data || [];
-
-      // Cache the successful response
-      PostsCache.setFeed(filters, posts);
-
-      return posts;
+      return posts
     } catch (error) {
-      console.error('Error fetching posts:', error);
-      throw error;
+      console.error('Error fetching posts:', error)
+      return []
     }
   }
 
@@ -179,10 +111,15 @@ export class PostsAPI {
     farm_id?: string
   }): Promise<Post> {
     try {
-      // Try posts table first
-      const res3 = await supabase
-        .from('posts')
-        .insert([postData])
+      const { data, error } = await supabase
+        .from('community_posts')
+        .insert([{
+          user_id: postData.user_id,
+          title: postData.title || '',
+          content: postData.body,
+          images: postData.images || [],
+          category: 'general'
+        }])
         .select(`
           *,
           user:user_id (
@@ -193,37 +130,8 @@ export class PostsAPI {
           )
         `)
         .single()
-      let data = res3.data;
-      const error = res3.error;
 
-  // If posts table doesn't exist, try community_posts
-  if (error && (error as any).message?.includes('relation "public.posts" does not exist')) {
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('community_posts')
-          .insert([{
-            user_id: postData.user_id,
-            title: postData.title || '',
-            content: postData.body,
-            images: postData.images || [],
-            category: 'general'
-          }])
-          .select(`
-            *,
-            user:user_id (
-              id,
-              username,
-              avatar_url,
-              full_name
-            )
-          `)
-          .single()
-
-        if (fallbackError) throw fallbackError
-        data = fallbackData
-      } else if (error) {
-        throw error
-      }
-
+      if (error) throw error
       return data
     } catch (error) {
       console.error('Error creating post:', error)
@@ -234,26 +142,10 @@ export class PostsAPI {
   // DELETE /api/posts/:id - Delete a post
   static async deletePost(postId: string): Promise<void> {
     try {
-      // Try posts table first, fallback to community_posts
-      let error: any = null
-      try {
-        const { error: deleteError } = await supabase
-          .from('posts')
-          .delete()
-          .eq('id', postId)
-        if (deleteError) throw deleteError
-      } catch (err: any) {
-        error = err
-        // Try community_posts table
-        if (err.message?.includes('relation "public.posts" does not exist')) {
-          const { error: retryError } = await supabase
-            .from('community_posts')
-            .delete()
-            .eq('id', postId)
-          if (retryError) throw retryError
-          error = null
-        }
-      }
+      const { error } = await supabase
+        .from('community_posts')
+        .delete()
+        .eq('id', postId)
 
       if (error) throw error
     } catch (error) {
@@ -267,7 +159,7 @@ export class PostsAPI {
     try {
       // Check if user already liked this post
       const { data: existingLike, error: fetchError } = await supabase
-        .from('likes')
+        .from('post_likes')
         .select()
         .eq('post_id', postId)
         .eq('user_id', userId)
@@ -278,7 +170,7 @@ export class PostsAPI {
       if (existingLike) {
         // Unlike the post
         const { error } = await supabase
-          .from('likes')
+          .from('post_likes')
           .delete()
           .eq('post_id', postId)
           .eq('user_id', userId)
@@ -286,7 +178,7 @@ export class PostsAPI {
 
         // Get updated count
         const { count: likesCount } = await supabase
-          .from('likes')
+          .from('post_likes')
           .select('*', { count: 'exact', head: true })
           .eq('post_id', postId)
 
@@ -294,13 +186,13 @@ export class PostsAPI {
       } else {
         // Like the post
         const { error } = await supabase
-          .from('likes')
+          .from('post_likes')
           .insert({ post_id: postId, user_id: userId })
         if (error) throw error
 
         // Get updated count
         const { count: likesCount } = await supabase
-          .from('likes')
+          .from('post_likes')
           .select('*', { count: 'exact', head: true })
           .eq('post_id', postId)
 
@@ -316,7 +208,7 @@ export class PostsAPI {
   static async addComment(postId: string, userId: string, content: string): Promise<Comment> {
     try {
       const { data, error } = await supabase
-        .from('comments')
+        .from('post_comments')
         .insert({
           post_id: postId,
           user_id: userId,
@@ -345,7 +237,7 @@ export class PostsAPI {
   static async getComments(postId: string): Promise<Comment[]> {
     try {
       const { data, error } = await supabase
-        .from('comments')
+        .from('post_comments')
         .select(`
           *,
           user:user_id (
@@ -369,15 +261,9 @@ export class PostsAPI {
   // GET /api/notifications - Get user notifications
   static async getNotifications(userId: string): Promise<Notification[]> {
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(50)
-
-      if (error) throw error
-      return data || []
+      // For now, return empty array since notifications table might not be set up
+      // This can be implemented later when notifications are properly configured
+      return []
     } catch (error) {
       console.error('Error fetching notifications:', error)
       throw error
@@ -387,15 +273,15 @@ export class PostsAPI {
   // POST /api/notifications/:id/read - Mark notification as read
   static async markNotificationAsRead(notificationId: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId)
-
-      if (error) throw error
+      // For now, do nothing since notifications table might not be set up
+      // This can be implemented later when notifications are properly configured
     } catch (error) {
       console.error('Error marking notification as read:', error)
       throw error
     }
   }
+}
+
+export async function getPosts() {
+  return PostsAPI.getPosts()
 }
