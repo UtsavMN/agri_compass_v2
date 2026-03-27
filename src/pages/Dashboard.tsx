@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
 import { cropRecommender } from '@/lib/ai/cropRecommender';
 import { weatherAdvisor } from '@/lib/ai/weatherAdvisor';
+=======
+import { apiGet } from '@/lib/httpClient';
+import { cropRecommender } from '@/lib/ai/cropRecommender';
+import { WeatherAPI } from '@/lib/api/weather';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -100,6 +106,7 @@ export default function Dashboard() {
       setSelectedDistrict(defaultDistrict);
 
       // Load crops
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('crops')
         .select('*')
@@ -107,6 +114,9 @@ export default function Dashboard() {
         .limit(6);
 
       if (error) throw error;
+=======
+      const data = await apiGet('/api/crops?limit=6');
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       setCrops(data || []);
 
 
@@ -134,8 +144,15 @@ export default function Dashboard() {
       setCropRecommendations(recommendations);
 
       // Load weather data
+<<<<<<< HEAD
       const weather = await weatherAdvisor.getWeatherData(selectedDistrict);
       setWeatherData(weather);
+=======
+      const weatherRes = await WeatherAPI.getWeatherForDistrict(selectedDistrict);
+      if (weatherRes) {
+        setWeatherData(weatherRes.weather);
+      }
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error loading district data:', error);
     }
@@ -304,7 +321,11 @@ export default function Dashboard() {
                     <div className="space-y-4">
                       {cropRecommendations.slice(0, 4).map((rec, index) => {
                         const districtInfo = districtData.find(d => d.district === selectedDistrict);
+<<<<<<< HEAD
                         const recommendedCrops = districtInfo?.recommended_crops?.split(', ') || [];
+=======
+                        const recommendedCrops = districtInfo?.recommended_crops?.split(' / ') || [];
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
                         const isRecommended = recommendedCrops.includes(rec.cropName);
 
                         return (

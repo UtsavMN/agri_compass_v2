@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
+=======
+// No longer using Supabase
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
 export interface DistrictData {
   district: string;
@@ -35,6 +39,7 @@ export class CropRecommender {
     if (this.districtsCache.length > 0) return this.districtsCache;
 
     try {
+<<<<<<< HEAD
       // Try to load from Supabase table first
       const { data, error } = await supabase
         .from('districts')
@@ -52,6 +57,12 @@ export class CropRecommender {
 
       if (csvData && !storageError) {
         const csvText = await csvData.text();
+=======
+      // Load directly from public CSV
+      const response = await fetch('/districts.csv');
+      if (response.ok) {
+        const csvText = await response.text();
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
         this.districtsCache = this.parseCSV(csvText);
         return this.districtsCache;
       }

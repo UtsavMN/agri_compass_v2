@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
 import { weatherAdvisor } from '@/lib/ai/weatherAdvisor';
+=======
+import { FarmsAPI } from '@/lib/api/farms';
+import { WeatherAPI } from '@/lib/api/weather';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { cropRecommender } from '@/lib/ai/cropRecommender';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -12,6 +17,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { CardShimmer } from '@/components/ui/loading-shimmer';
+<<<<<<< HEAD
+=======
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/animations';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Sprout, MapPin, Ruler, Droplet, Trash2, Cloud, Thermometer, Wind, CloudRain } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -117,6 +126,7 @@ export default function MyFarm() {
 
   const loadFarms = async () => {
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('farms')
         .select('*')
@@ -124,6 +134,10 @@ export default function MyFarm() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+=======
+      if (!user?.id) return;
+      const data = await FarmsAPI.getFarms(user.id);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       setFarms(data || []);
     } catch (error) {
       const err = error as { message?: string };
@@ -142,8 +156,15 @@ export default function MyFarm() {
 
     try {
       // Load weather data
+<<<<<<< HEAD
       const weather = await weatherAdvisor.getWeatherData(selectedDistrict);
       setWeatherData(weather);
+=======
+      const weatherRes = await WeatherAPI.getWeatherForDistrict(selectedDistrict);
+      if (weatherRes) {
+        setWeatherData(weatherRes.weather);
+      }
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
       // Load crop recommendations
       const recommendations = await cropRecommender.getRecommendations(selectedDistrict);
@@ -157,6 +178,7 @@ export default function MyFarm() {
     e.preventDefault();
 
     try {
+<<<<<<< HEAD
       const { error } = await supabase.from('farms').insert([
         {
           user_id: user?.id,
@@ -169,6 +191,17 @@ export default function MyFarm() {
       ]);
 
       if (error) throw error;
+=======
+      if (!user?.id) return;
+      await FarmsAPI.createFarm({
+        user_id: user.id,
+        name: formData.name,
+        location: formData.location,
+        area_acres: parseFloat(formData.area_acres),
+        soil_type: formData.soil_type || undefined,
+        irrigation_type: formData.irrigation_type || undefined,
+      });
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
       toast({
         title: 'Farm added!',
@@ -194,13 +227,30 @@ export default function MyFarm() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const handleLogWeather = async (farmId: string) => {
+    if (!weatherData || !selectedDistrict || !user) return;
+    try {
+      await WeatherAPI.logWeatherForFarm(farmId, selectedDistrict, weatherData, user.id);
+      toast({ title: 'Weather logged successfully!', description: 'Saved to farm history.' });
+    } catch (error) {
+      toast({ title: 'Failed to log weather', variant: 'destructive' });
+    }
+  };
+
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   const handleDelete = async (farmId: string) => {
     if (!confirm('Are you sure you want to delete this farm?')) return;
 
     try {
+<<<<<<< HEAD
       const { error } = await supabase.from('farms').delete().eq('id', farmId);
 
       if (error) throw error;
+=======
+      await FarmsAPI.deleteFarm(farmId);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
       toast({
         title: 'Farm deleted',
@@ -230,6 +280,10 @@ export default function MyFarm() {
   return (
     <Layout>
       <div className="space-y-6">
+<<<<<<< HEAD
+=======
+        <ScrollReveal>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
@@ -356,6 +410,10 @@ export default function MyFarm() {
             </Dialog>
           </div>
         </div>
+<<<<<<< HEAD
+=======
+        </ScrollReveal>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
         {loading ? (
           <div className="text-center py-12">
@@ -380,6 +438,10 @@ export default function MyFarm() {
           <div>
             {/* Weather and AI Recommendations Section */}
             {selectedDistrict && (
+<<<<<<< HEAD
+=======
+              <ScrollReveal delay={0.1}>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {/* Weather Card */}
                 {weatherData ? (
@@ -491,6 +553,7 @@ export default function MyFarm() {
                   <CardShimmer />
                 )}
               </div>
+<<<<<<< HEAD
             )}
 
             {/* Farms Grid */}
@@ -505,6 +568,20 @@ export default function MyFarm() {
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
                     <Card className="hover:shadow-lg transition-shadow duration-300 border-green-100">
+=======
+              </ScrollReveal>
+            )}
+
+            {/* Farms Grid */}
+            <ScrollReveal delay={0.2}>
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-gradient">Your Farms</h2>
+              <StaggerContainer staggerDelay={0.1}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {farms.map((farm, index) => (
+                  <StaggerItem key={farm.id}>
+                    <Card className="card-hover transition-shadow duration-300 border-green-100">
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
                       <CardHeader>
                         <div className="flex justify-between items-start">
                           <div>
@@ -514,6 +591,7 @@ export default function MyFarm() {
                               {farm.location}
                             </CardDescription>
                           </div>
+<<<<<<< HEAD
                           <Button
                             variant="ghost"
                             size="icon"
@@ -522,6 +600,27 @@ export default function MyFarm() {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
+=======
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Log Current Weather"
+                              onClick={() => handleLogWeather(farm.id)}
+                              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Cloud className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(farm.id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
@@ -543,10 +642,19 @@ export default function MyFarm() {
                         )}
                       </CardContent>
                     </Card>
+<<<<<<< HEAD
                   </motion.div>
                 ))}
               </div>
             </div>
+=======
+                  </StaggerItem>
+                ))}
+              </div>
+              </StaggerContainer>
+            </div>
+            </ScrollReveal>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
           </div>
         )}
       </div>

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase'
+=======
+import { FarmsAPI } from '@/lib/api/farms'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { WeatherAdvisor, WeatherData, WeatherAdvice } from '@/lib/ai/weatherAdvisor'
 import { WeatherCache, NetworkUtils } from '@/lib/cache'
 
@@ -95,6 +99,7 @@ export class WeatherAPI {
   }
 
   // Store weather log for farm
+<<<<<<< HEAD
   static async logWeatherForFarm(farmId: string, district: string, weatherData: WeatherData): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -115,6 +120,16 @@ export class WeatherAPI {
         return false
       }
 
+=======
+  static async logWeatherForFarm(farmId: string, district: string, weatherData: WeatherData, userId: string = 'system'): Promise<boolean> {
+    try {
+      await FarmsAPI.addWeatherLog(farmId, userId, {
+        notes: `Auto-logged weather for ${district}`,
+        temperature: weatherData.temperature,
+        humidity: weatherData.humidity,
+        conditions: weatherData.description
+      });
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       return true
     } catch (error) {
       console.error('Weather logging error:', error)
@@ -123,6 +138,7 @@ export class WeatherAPI {
   }
 
   // Get last 7 days weather logs for farm
+<<<<<<< HEAD
   static async getWeatherHistoryForFarm(farmId: string): Promise<WeatherLog[]> {
     try {
       const sevenDaysAgo = new Date()
@@ -141,6 +157,11 @@ export class WeatherAPI {
       }
 
       return data || []
+=======
+  static async getWeatherHistoryForFarm(farmId: string): Promise<any[]> {
+    try {
+      return await FarmsAPI.getWeatherLogs(farmId);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Weather history fetch error:', error)
       return []

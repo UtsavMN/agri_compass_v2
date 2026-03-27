@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase'
 import { PostsAPI, Post } from '@/lib/api/posts'
+=======
+import { PostsAPI, Post } from '@/lib/api/posts'
+import { UploadAPI } from '@/lib/api/upload'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import Layout from '@/components/Layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -11,6 +16,10 @@ import { PostCard } from '@/components/ui/post-card'
 import { useToast } from '@/hooks/use-toast'
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/animations'
 import { LottieEmptyState } from '@/components/ui/lottie-loading'
+<<<<<<< HEAD
+=======
+import { PostListSkeleton } from '@/components/ui/post-skeleton'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { Plus, ImagePlus, Video } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 
@@ -22,6 +31,10 @@ export default function Community() {
   const [isCreatingPost, setIsCreatingPost] = useState(false)
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [isLoading, setIsLoading] = useState(false)
+<<<<<<< HEAD
+=======
+  const [isFetchingPosts, setIsFetchingPosts] = useState(true)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -38,6 +51,10 @@ export default function Community() {
   }, [])
 
   const fetchPosts = async () => {
+<<<<<<< HEAD
+=======
+    setIsFetchingPosts(true)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     try {
       const data = await PostsAPI.getPosts()
       setPosts(data)
@@ -49,6 +66,11 @@ export default function Community() {
         description: msg || 'Please try again later',
         variant: 'destructive'
       })
+<<<<<<< HEAD
+=======
+    } finally {
+      setIsFetchingPosts(false)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     }
   }
 
@@ -58,6 +80,7 @@ export default function Community() {
     setIsLoading(true)
     try {
       // Upload media files if any
+<<<<<<< HEAD
       const mediaUrls = []
       for (const file of mediaFiles) {
         const fileExt = (file.name || '').split('.').pop()
@@ -75,6 +98,13 @@ export default function Community() {
           .getPublicUrl(filePath)
 
         mediaUrls.push(data.publicUrl)
+=======
+      const mediaUrls: string[] = []
+      if (mediaFiles.length > 0) {
+        toast({ title: 'Uploading media...' })
+        const urls = await UploadAPI.uploadMultipleMedia(mediaFiles, 'posts')
+        mediaUrls.push(...urls)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       }
 
       // Create post
@@ -106,6 +136,7 @@ export default function Community() {
   }
 
   const handleLike = async (postId: string) => {
+<<<<<<< HEAD
     try {
       // Check if user already liked this post
       const { data: existingLike, error: fetchError } = await supabase
@@ -136,6 +167,11 @@ export default function Community() {
         if (error) throw error
       }
 
+=======
+    if (!user?.id) return;
+    try {
+      await PostsAPI.toggleLike(postId, user.id);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       fetchPosts()
     } catch (error) {
       console.error('Error toggling like:', error)
@@ -149,6 +185,7 @@ export default function Community() {
   }
 
   const handleComment = async (postId: string, content: string) => {
+<<<<<<< HEAD
     try {
       const { error } = await supabase
         .from('comments')
@@ -158,6 +195,11 @@ export default function Community() {
           content
         })
       if (error) throw error
+=======
+    if (!user?.id) return;
+    try {
+      await PostsAPI.addComment(postId, user.id, content);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
       fetchPosts()
       toast({
@@ -251,7 +293,13 @@ export default function Community() {
         </Dialog>
 
         <ScrollReveal direction="up" delay={0.1}>
+<<<<<<< HEAD
           {posts.length > 0 ? (
+=======
+          {isFetchingPosts ? (
+            <PostListSkeleton />
+          ) : posts.length > 0 ? (
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
             <StaggerContainer staggerDelay={0.05}>
               <div className="grid gap-4">
                 {posts.map((post) => (

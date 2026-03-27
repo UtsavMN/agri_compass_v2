@@ -1,10 +1,19 @@
+<<<<<<< HEAD
 import { useState } from 'react'
+=======
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { Avatar, AvatarImage, AvatarFallback } from './avatar'
 import { Button } from './button'
 import { Card } from './card'
 import { Textarea } from './textarea'
 import { format } from 'date-fns'
+<<<<<<< HEAD
 import { Heart, MessageCircle, Share2, MoreVertical } from 'lucide-react'
+=======
+import { Heart, MessageCircle, Share2, MoreVertical, Loader2 } from 'lucide-react'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { useToast } from '@/hooks/use-toast'
 import {
   DropdownMenu,
@@ -12,6 +21,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './dropdown-menu'
+<<<<<<< HEAD
+=======
+import { PostsAPI, Comment } from '@/lib/api/posts'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
 interface PostCardProps {
   post: {
@@ -50,17 +63,51 @@ export function PostCard({
 }: PostCardProps) {
   const [isCommenting, setIsCommenting] = useState(false)
   const [commentContent, setCommentContent] = useState('')
+<<<<<<< HEAD
   const { toast } = useToast()
 
+=======
+  const [comments, setComments] = useState<Comment[]>([])
+  const [isLoadingComments, setIsLoadingComments] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    if (isCommenting) {
+      setIsLoadingComments(true)
+      PostsAPI.getComments(post.id)
+        .then(setComments)
+        .catch(console.error)
+        .finally(() => setIsLoadingComments(false))
+    }
+  }, [isCommenting, post.id])
+
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   const handleLike = () => {
     onLike?.(post.id)
   }
 
+<<<<<<< HEAD
   const handleComment = () => {
     if (!commentContent.trim()) return
     onComment?.(post.id, commentContent)
     setCommentContent('')
     setIsCommenting(false)
+=======
+  const handleComment = async () => {
+    if (!commentContent.trim()) return
+    setIsSubmitting(true)
+    const tempContent = commentContent
+    try {
+      await onComment?.(post.id, tempContent)
+      setCommentContent('')
+      // Re-fetch comments to display the newly posted one
+      const updatedComments = await PostsAPI.getComments(post.id)
+      setComments(updatedComments)
+    } finally {
+      setIsSubmitting(false)
+    }
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   }
 
   const handleShare = () => {
@@ -150,6 +197,7 @@ export function PostCard({
           </Button>
         </div>
 
+<<<<<<< HEAD
         {isCommenting && (
           <div className="mt-4">
             <Textarea
@@ -166,6 +214,67 @@ export function PostCard({
             </div>
           </div>
         )}
+=======
+        <AnimatePresence>
+          {isCommenting && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 border-t pt-4"
+            >
+              
+              <div className="mb-6 space-y-4">
+                {isLoadingComments ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-green-600" />
+                  </div>
+                ) : comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <motion.div 
+                      key={comment.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-3 bg-gray-50/50 p-3 rounded-lg"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={comment.user.avatar_url} />
+                        <AvatarFallback>{comment.user.username[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-semibold text-sm">{comment.user.full_name || comment.user.username}</span>
+                          <span className="text-xs text-gray-500">{format(new Date(comment.created_at), 'MMM d')}</span>
+                        </div>
+                        <p className="text-sm mt-1 text-gray-800">{comment.content}</p>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 text-center italic">No comments yet. Be the first to share your thoughts!</p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Textarea
+                  placeholder="Write a comment..."
+                  value={commentContent}
+                  onChange={(e) => setCommentContent(e.target.value)}
+                  className="min-h-[80px] resize-none focus-visible:ring-green-500"
+                />
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setIsCommenting(false)}>
+                    Close
+                  </Button>
+                  <Button size="sm" onClick={handleComment} disabled={isSubmitting || !commentContent.trim()}>
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Post Comment'}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       </div>
     </Card>
   )

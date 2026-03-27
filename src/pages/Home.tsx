@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
+=======
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { translateToKannada, containsKannada } from '@/lib/ai/translator';
 import { cropRecommender, DetailedCropData } from '@/lib/ai/cropRecommender';
 import { PostsAPI, Post } from '@/lib/api/posts';
@@ -101,6 +104,7 @@ export default function Home() {
       const post = posts.find(p => p.id === postId);
       if (!post) return;
 
+<<<<<<< HEAD
       if (post.isLiked) {
         // Unlike
         await supabase
@@ -126,6 +130,15 @@ export default function Home() {
             : p
         ));
       }
+=======
+      await PostsAPI.toggleLike(postId, user.id);
+
+      setPosts(prev => prev.map(p =>
+        p.id === postId
+          ? { ...p, isLiked: !p.isLiked, _count: { ...p._count!, likes: p._count!.likes + (p.isLiked ? -1 : 1) } }
+          : p
+      ));
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error toggling like:', error);
     }
@@ -135,6 +148,7 @@ export default function Home() {
     if (!user) return;
 
     try {
+<<<<<<< HEAD
       await supabase
         .from('comments')
         .insert({
@@ -142,6 +156,9 @@ export default function Home() {
           user_id: user.id,
           content,
         });
+=======
+      await PostsAPI.addComment(postId, user.id, content);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
       // Update comment count
       setPosts(prev => prev.map(p =>

@@ -12,6 +12,12 @@
   },
   "dependencies": {
     "@babel/helpers": "^7.28.4",
+<<<<<<< HEAD
+=======
+    "@clerk/backend": "^3.2.1",
+    "@clerk/clerk-react": "^5.61.3",
+    "@libsql/client": "^0.17.2",
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -21,7 +27,10 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
+<<<<<<< HEAD
     "@supabase/supabase-js": "^2.57.4",
+=======
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     "@tanstack/react-query": "^5.90.5",
     "@types/react-speech-recognition": "^3.9.6",
     "@types/uuid": "^10.0.0",
@@ -31,6 +40,10 @@
     "clsx": "^2.1.1",
     "cross-spawn": "^7.0.6",
     "date-fns": "^4.1.0",
+<<<<<<< HEAD
+=======
+    "dotenv": "^17.3.1",
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     "framer-motion": "^12.23.24",
     "fuse.js": "^7.1.0",
     "i18next": "^25.6.0",
@@ -65,7 +78,10 @@
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
+<<<<<<< HEAD
     "supabase": "^2.54.10",
+=======
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     "tailwindcss": "^3.4.1",
     "terser": "^5.44.0",
     "typescript": "^5.5.3",

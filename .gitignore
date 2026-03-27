@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# Logs
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 logs
 *.log
 npm-debug.log*
@@ -6,11 +10,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+<<<<<<< HEAD
 node_modules
+=======
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 dist
 dist-ssr
 *.local
 
+<<<<<<< HEAD
+=======
+# IDE
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -20,4 +35,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
 .env
+=======
+
+# Environment
+.env
+.env.*
+
+# Large Blobs & API specific
+agri-compass-api/jdk-17.0.2/
+agri-compass-api/maven.zip
+agri-compass-api/target/
+agri-compass-api/*.db
+agri-compass-api/*.log
+agri-compass-api/apache-maven-3.9.6/
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))

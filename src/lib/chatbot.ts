@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import { apiPost } from './httpClient';
+
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 export type ChatMessage = {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -8,6 +13,7 @@ export interface ChatbotProvider {
   sendMessage(messages: ChatMessage[]): Promise<string>;
 }
 
+<<<<<<< HEAD
 // Default local provider (fallback) — kept for offline/dev usage
 class DefaultChatbotProvider implements ChatbotProvider {
   name = 'default';
@@ -15,11 +21,19 @@ class DefaultChatbotProvider implements ChatbotProvider {
   async sendMessage(messages: ChatMessage[]): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve, 600)); // Simulate API delay
 
+=======
+// Spring Boot Backend API Provider
+class BackendChatbotProvider implements ChatbotProvider {
+  name = 'spring-boot-backend';
+
+  async sendMessage(messages: ChatMessage[]): Promise<string> {
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     const last = messages[messages.length - 1];
     const message = last?.content ?? '';
 
     if (!message) return 'Please provide a question or prompt.';
 
+<<<<<<< HEAD
     // Simple rule-based responses for common topics
     if (message.toLowerCase().includes('pest') || message.toLowerCase().includes('disease')) {
       return `Here are some tips for pest and disease control:\n1. Regularly inspect your crops.\n2. Use targeted pesticides when necessary.\n3. Maintain field hygiene.\n4. Consider biological controls.\n5. Implement crop rotation.`;
@@ -82,6 +96,14 @@ class RemoteChatbotProvider implements ChatbotProvider {
       console.error('Failed to communicate with API:', error);
       // Fallback to default provider on any error
       return new DefaultChatbotProvider().sendMessage(messages);
+=======
+    try {
+      const response = await apiPost('/api/ai/chat', { message });
+      return response.response || 'I am sorry, but I failed to generate a response.';
+    } catch (error) {
+      console.error('Backend AI API error:', error);
+      return 'I am currently offline. Please ensure the backend server is running.';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     }
   }
 }
@@ -91,6 +113,7 @@ class ChatbotService {
   private provider: ChatbotProvider;
 
   constructor() {
+<<<<<<< HEAD
     // Initialize the provider
     if (import.meta.env.VITE_GEMINI_API_URL) {
       const remote = new RemoteChatbotProvider();
@@ -100,6 +123,9 @@ class ChatbotService {
     } else {
       this.provider = new DefaultChatbotProvider();
     }
+=======
+    this.provider = new BackendChatbotProvider();
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   }
 
   async chatWithAI(message: string): Promise<string> {

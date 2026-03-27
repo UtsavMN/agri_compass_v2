@@ -58,9 +58,13 @@ export default function Layout({ children }: LayoutProps) {
     { path: '/weather', label: t('nav.weather'), icon: Cloud },
   ];
 
+<<<<<<< HEAD
   if (!user) {
     return <div>{children}</div>;
   }
+=======
+  // Removed the strict return so the layout wraps the app beautifully even when logged out.
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
@@ -148,6 +152,7 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                 </Button>
 
+<<<<<<< HEAD
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -175,6 +180,41 @@ export default function Layout({ children }: LayoutProps) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+=======
+                {/* User Menu / Sign In */}
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                        <User className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium">
+                            {profile?.full_name || profile?.username || 'User'}
+                          </p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/profile')}>
+                        <User className="mr-2 h-4 w-4" />
+                        {t('nav.profile')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        {t('auth.signOut')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button onClick={() => navigate('/auth')} className="bg-green-600 hover:bg-green-700 text-white">
+                    Sign In
+                  </Button>
+                )}
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
                 {/* Mobile Menu Button */}
                 <Button

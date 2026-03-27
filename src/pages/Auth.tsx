@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,6 +69,15 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+=======
+import { Sprout } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+export default function Auth() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md flex flex-col items-center">
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="bg-green-600 p-3 rounded-full">
@@ -80,6 +90,7 @@ export default function Auth() {
           <p className="text-gray-600">Your Complete Farming Assistant</p>
         </div>
 
+<<<<<<< HEAD
         <Card className="shadow-xl border-green-100">
           <CardHeader>
             <CardTitle>Get Started</CardTitle>
@@ -172,6 +183,12 @@ export default function Auth() {
             </Tabs>
           </CardContent>
         </Card>
+=======
+        <div className="bg-white p-6 rounded-lg text-center shadow-sm">
+          <p className="mb-4">Authentication is bypassed for local development.</p>
+          <Link to="/" className="text-leaf-600 font-medium hover:text-leaf-700">Go back to the application</Link>
+        </div>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       </div>
     </div>
   );

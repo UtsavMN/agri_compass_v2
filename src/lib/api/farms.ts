@@ -1,5 +1,10 @@
 // API endpoints for farms management
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase'
+=======
+import { apiGet, apiPost, apiDelete } from '../httpClient'
+import { UploadAPI } from './upload'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
 export interface Farm {
   id: string
@@ -38,6 +43,7 @@ export class FarmsAPI {
   // GET /api/farms - Get user's farms with enhanced data
   static async getFarms(userId: string): Promise<Farm[]> {
     try {
+<<<<<<< HEAD
       const { data, error } = await (supabase as any)
         .from('farms')
         .select(`
@@ -58,6 +64,13 @@ export class FarmsAPI {
       })) || []
 
       return farms
+=======
+      const farms = await apiGet(`/api/farms?userId=${userId}`)
+      return farms.map((farm: Farm) => ({
+        ...farm,
+        duration_days: Math.floor((Date.now() - new Date(farm.created_at).getTime()) / (1000 * 60 * 60 * 24)),
+      }))
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error fetching farms:', error)
       throw error
@@ -74,6 +87,7 @@ export class FarmsAPI {
     irrigation_type?: string
   }): Promise<Farm> {
     try {
+<<<<<<< HEAD
       const { data, error } = await (supabase as any)
         .from('farms')
         .insert([farmData])
@@ -82,6 +96,9 @@ export class FarmsAPI {
 
       if (error) throw error
       return data
+=======
+      return await apiPost('/api/farms', farmData)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error creating farm:', error)
       throw error
@@ -96,6 +113,7 @@ export class FarmsAPI {
     conditions: string
   }): Promise<WeatherLog> {
     try {
+<<<<<<< HEAD
       const { data, error } = await (supabase as any)
         .from('farm_weather_logs')
         .insert({
@@ -108,6 +126,9 @@ export class FarmsAPI {
 
       if (error) throw error
       return data
+=======
+      return await apiPost(`/api/farms/${farmId}/weather`, { userId, ...logData })
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error adding weather log:', error)
       throw error
@@ -117,6 +138,7 @@ export class FarmsAPI {
   // GET /api/farms/:id/weather - Get weather logs for a farm
   static async getWeatherLogs(farmId: string): Promise<WeatherLog[]> {
     try {
+<<<<<<< HEAD
       const { data, error } = await (supabase as any)
         .from('farm_weather_logs')
         .select('*')
@@ -125,6 +147,9 @@ export class FarmsAPI {
 
       if (error) throw error
       return data || []
+=======
+      return await apiGet(`/api/farms/${farmId}/weather`)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error fetching weather logs:', error)
       throw error
@@ -134,6 +159,7 @@ export class FarmsAPI {
   // POST /api/farms/:id/images - Upload farm image
   static async uploadFarmImage(farmId: string, userId: string, file: File, caption?: string): Promise<FarmImage> {
     try {
+<<<<<<< HEAD
       // Upload image to Supabase Storage
       const fileExt = file.name.split('.').pop()
       const fileName = `${farmId}/${Date.now()}.${fileExt}`
@@ -164,6 +190,16 @@ export class FarmsAPI {
 
       if (error) throw error
       return data
+=======
+      // Upload raw file using the generic Multipart upload endpoint
+      const uploadResult = await UploadAPI.uploadMedia(file, 'farms')
+      
+      return await apiPost(`/api/farms/${farmId}/images`, {
+        userId,
+        image_url: uploadResult.url,
+        caption: caption || null
+      })
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error uploading farm image:', error)
       throw error
@@ -173,6 +209,7 @@ export class FarmsAPI {
   // GET /api/farms/:id/images - Get farm images
   static async getFarmImages(farmId: string): Promise<FarmImage[]> {
     try {
+<<<<<<< HEAD
       const { data, error } = await (supabase as any)
         .from('farm_images')
         .select('*')
@@ -181,6 +218,9 @@ export class FarmsAPI {
 
       if (error) throw error
       return data || []
+=======
+      return await apiGet(`/api/farms/${farmId}/images`)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error fetching farm images:', error)
       throw error
@@ -190,6 +230,7 @@ export class FarmsAPI {
   // POST /api/farms/:id/share - Share farm update to community
   static async shareToCommunity(farmId: string, userId: string, content: string): Promise<any> {
     try {
+<<<<<<< HEAD
       // Get farm details
       const { data: farm, error: farmError } = await (supabase as any)
         .from('farms')
@@ -223,6 +264,9 @@ export class FarmsAPI {
 
       if (error) throw error
       return data
+=======
+      return await apiPost(`/api/farms/${farmId}/share`, { userId, content })
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error sharing to community:', error)
       throw error
@@ -232,12 +276,16 @@ export class FarmsAPI {
   // DELETE /api/farms/:id - Delete a farm
   static async deleteFarm(farmId: string): Promise<void> {
     try {
+<<<<<<< HEAD
       const { error } = await (supabase as any)
         .from('farms')
         .delete()
         .eq('id', farmId)
 
       if (error) throw error
+=======
+      await apiDelete(`/api/farms/${farmId}`)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error deleting farm:', error)
       throw error

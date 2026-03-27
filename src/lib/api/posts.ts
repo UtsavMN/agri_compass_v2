@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { supabase } from '../supabase'
+=======
+import { apiGet, apiPost, apiDelete } from '../httpClient'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
 export interface Post {
   id: string
@@ -50,7 +54,11 @@ export interface Notification {
 }
 
 export class PostsAPI {
+<<<<<<< HEAD
   // GET /api/posts - Retrieve all posts in reverse chronological order with filters and caching
+=======
+  // GET /api/posts - Retrieve all posts in reverse chronological order with filters
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   static async getPosts(filters?: {
     crop?: string
     location?: string
@@ -58,6 +66,7 @@ export class PostsAPI {
     q?: string
   }): Promise<Post[]> {
     try {
+<<<<<<< HEAD
       let query = supabase
         .from('community_posts')
         .select(`
@@ -94,6 +103,20 @@ export class PostsAPI {
       const posts = data || []
 
       return posts
+=======
+      let queryString = '';
+      if (filters) {
+        const params = new URLSearchParams();
+        if (filters.crop) params.append('crop', filters.crop);
+        if (filters.location) params.append('location', filters.location);
+        if (filters.user) params.append('user', filters.user);
+        if (filters.q) params.append('q', filters.q);
+        const qStr = params.toString();
+        if (qStr) queryString = `?${qStr}`;
+      }
+
+      return await apiGet(`/api/posts${queryString}`);
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error fetching posts:', error)
       return []
@@ -111,6 +134,7 @@ export class PostsAPI {
     farm_id?: string
   }): Promise<Post> {
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('community_posts')
         .insert([{
@@ -133,6 +157,9 @@ export class PostsAPI {
 
       if (error) throw error
       return data
+=======
+      return await apiPost('/api/posts', postData)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error creating post:', error)
       throw error
@@ -142,12 +169,16 @@ export class PostsAPI {
   // DELETE /api/posts/:id - Delete a post
   static async deletePost(postId: string): Promise<void> {
     try {
+<<<<<<< HEAD
       const { error } = await supabase
         .from('community_posts')
         .delete()
         .eq('id', postId)
 
       if (error) throw error
+=======
+      await apiDelete(`/api/posts/${postId}`)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error deleting post:', error)
       throw error
@@ -157,6 +188,7 @@ export class PostsAPI {
   // POST /api/posts/:id/like - Like/unlike a post
   static async toggleLike(postId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
     try {
+<<<<<<< HEAD
       // Check if user already liked this post
       const { data: existingLike, error: fetchError } = await supabase
         .from('post_likes')
@@ -198,6 +230,9 @@ export class PostsAPI {
 
         return { liked: true, likesCount: likesCount || 0 }
       }
+=======
+      return await apiPost(`/api/posts/${postId}/like`, { userId })
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error toggling like:', error)
       throw error
@@ -207,6 +242,7 @@ export class PostsAPI {
   // POST /api/posts/:id/comments - Add a comment to a post
   static async addComment(postId: string, userId: string, content: string): Promise<Comment> {
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('post_comments')
         .insert({
@@ -227,6 +263,9 @@ export class PostsAPI {
 
       if (error) throw error
       return data
+=======
+      return await apiPost(`/api/posts/${postId}/comments`, { userId, content })
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error adding comment:', error)
       throw error
@@ -236,6 +275,7 @@ export class PostsAPI {
   // GET /api/posts/:id/comments - Get comments for a post
   static async getComments(postId: string): Promise<Comment[]> {
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('post_comments')
         .select(`
@@ -252,6 +292,9 @@ export class PostsAPI {
 
       if (error) throw error
       return data || []
+=======
+      return await apiGet(`/api/posts/${postId}/comments`)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error fetching comments:', error)
       throw error
@@ -261,8 +304,11 @@ export class PostsAPI {
   // GET /api/notifications - Get user notifications
   static async getNotifications(userId: string): Promise<Notification[]> {
     try {
+<<<<<<< HEAD
       // For now, return empty array since notifications table might not be set up
       // This can be implemented later when notifications are properly configured
+=======
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       return []
     } catch (error) {
       console.error('Error fetching notifications:', error)
@@ -273,8 +319,12 @@ export class PostsAPI {
   // POST /api/notifications/:id/read - Mark notification as read
   static async markNotificationAsRead(notificationId: string): Promise<void> {
     try {
+<<<<<<< HEAD
       // For now, do nothing since notifications table might not be set up
       // This can be implemented later when notifications are properly configured
+=======
+      // Logic for marking read
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
     } catch (error) {
       console.error('Error marking notification as read:', error)
       throw error

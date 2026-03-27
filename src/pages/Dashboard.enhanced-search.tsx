@@ -6,7 +6,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
+=======
+import { apiGet } from '@/lib/httpClient';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { cropRecommender } from '@/lib/ai/cropRecommender';
 import { weatherAdvisor } from '@/lib/ai/weatherAdvisor';
 import Layout from '@/components/Layout';
@@ -108,6 +112,7 @@ export default function EnhancedDashboard() {
   const initializeDashboard = async () => {
     try {
       // Load crops
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('crops')
         .select('*')
@@ -115,6 +120,9 @@ export default function EnhancedDashboard() {
         .limit(6);
 
       if (error) throw error;
+=======
+      const data = await apiGet('/api/crops?limit=6');
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       setCrops(data || []);
     } catch (error) {
       console.error('Error initializing dashboard:', error);

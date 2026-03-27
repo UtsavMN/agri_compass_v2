@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
+=======
+import { apiGet } from '@/lib/httpClient';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +13,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, MapPin, Phone, Globe, Save } from 'lucide-react';
+<<<<<<< HEAD
+=======
+import ArchitectureMap from '@/components/ArchitectureMap';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
 export default function Profile() {
   const { user, profile, updateProfile } = useAuth();
@@ -57,6 +65,7 @@ export default function Profile() {
     if (!user?.id) return;
     setLoadingPosts(true);
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('community_posts')
         .select('*')
@@ -64,6 +73,11 @@ export default function Profile() {
         .order('created_at', { ascending: false })
         .range((nextPage - 1) * PAGE_SIZE, nextPage * PAGE_SIZE - 1);
       if (error) throw error;
+=======
+      // NOTE: Using the new generic apiget client. The backend must support pagination!
+      const data = await apiGet(`/api/posts?userId=${user.id}&page=${nextPage}&limit=${PAGE_SIZE}`);
+      
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       if (nextPage === 1) setPosts(data || []);
       else setPosts((prev) => [...prev, ...(data || [])]);
       setPage(nextPage);
@@ -229,6 +243,19 @@ export default function Profile() {
 
       <Card>
         <CardHeader>
+<<<<<<< HEAD
+=======
+          <CardTitle>Architecture Flowchart</CardTitle>
+          <CardDescription>Explore the technologies powering Agri Compass v2</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ArchitectureMap />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
           <CardTitle>My Posts</CardTitle>
           <CardDescription>Your recent community posts</CardDescription>
         </CardHeader>

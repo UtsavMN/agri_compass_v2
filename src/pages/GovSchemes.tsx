@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase';
+=======
+import { apiGet } from '@/lib/httpClient';
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,6 +42,7 @@ export default function GovSchemes() {
 
   const loadSchemes = async () => {
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('government_schemes')
         .select('*')
@@ -45,6 +50,9 @@ export default function GovSchemes() {
         .order('name', { ascending: true });
 
       if (error) throw error;
+=======
+      const data = await apiGet('/api/schemes');
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       setSchemes(data || []);
     } catch (error) {
       const err = error as { message?: string };

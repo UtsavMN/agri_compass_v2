@@ -17,6 +17,7 @@ import NotFound from '@/pages/NotFound';
 
 function App() {
   return (
+<<<<<<< HEAD
     <AuthProvider>
       <ThemeProvider>
         <LanguageProvider>
@@ -39,6 +40,30 @@ function App() {
         </LanguageProvider>
       </ThemeProvider>
     </AuthProvider>
+=======
+      <AuthProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<Community />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/crop/:cropName" element={<CropDetails />} />
+                <Route path="/my-farm" element={<MyFarm />} />
+                <Route path="/market-prices" element={<MarketPrices />} />
+                <Route path="/schemes" element={<GovSchemes />} />
+                <Route path="/air-agent" element={<AirAgent />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/weather" element={<Weather />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </Router>
+          </LanguageProvider>
+        </ThemeProvider>
+      </AuthProvider>
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   );
 }
 

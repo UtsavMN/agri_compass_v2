@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase'
+=======
+import { apiGet, apiPost } from '../httpClient'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 
 export interface AIChatRequest {
   user_id: string
@@ -19,6 +23,7 @@ export class AIAPI {
       // Fetch farm details if farm_id is provided
       let farmContext = ''
       if (request.farm_id) {
+<<<<<<< HEAD
         const { data: farm, error: farmError } = await supabase
           .from('farms')
           .select('*')
@@ -30,6 +35,12 @@ export class AIAPI {
           console.warn('Could not fetch farm details:', farmError)
         } else if (farm) {
           farmContext = `
+=======
+        try {
+          const farm = await apiGet(`/api/farms/${request.farm_id}`)
+          if (farm) {
+            farmContext = `
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 Farm Context:
 - Name: ${farm.name}
 - Location: ${farm.location}
@@ -37,7 +48,14 @@ Farm Context:
 - Soil Type: ${farm.soil_type || 'Not specified'}
 - Irrigation: ${farm.irrigation_type || 'Not specified'}
 - Farm Age: ${Math.floor((Date.now() - new Date(farm.created_at).getTime()) / (1000 * 60 * 60 * 24))} days
+<<<<<<< HEAD
           `.trim()
+=======
+            `.trim()
+          }
+        } catch (farmError) {
+          console.warn('Could not fetch farm details:', farmError)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
         }
       }
 
@@ -58,6 +76,7 @@ Provide a helpful, concise response in English or Kannada as appropriate.`
       const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
 
       try {
+<<<<<<< HEAD
         const response = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: {
@@ -79,6 +98,16 @@ Provide a helpful, concise response in English or Kannada as appropriate.`
 
         const data = await response.json()
 
+=======
+        const data = await apiPost('/api/ai/chat', {
+          prompt: systemPrompt,
+          user_id: request.user_id,
+          farm_id: request.farm_id
+        }, { signal: controller.signal })
+
+        clearTimeout(timeoutId)
+
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
         return {
           response: data.response || data.text || 'AI temporarily unavailable',
           success: true

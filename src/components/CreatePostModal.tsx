@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+<<<<<<< HEAD
 import { supabase } from '@/lib/supabase'
 import { PostsAPI } from '@/lib/api/posts'
+=======
+import { PostsAPI } from '@/lib/api/posts'
+import { FarmsAPI } from '@/lib/api/farms'
+import { UploadAPI } from '@/lib/api/upload'
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -71,12 +77,16 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
 
     setLoadingFarms(true)
     try {
+<<<<<<< HEAD
       const { data, error } = await supabase
         .from('farms')
         .select('id, name, crop_type, location')
         .eq('user_id', user.id)
 
       if (error) throw error
+=======
+      const data = await FarmsAPI.getFarms(user.id)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       setFarms(data || [])
     } catch (error) {
       console.error('Error loading farms:', error)
@@ -116,6 +126,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
     try {
       // Upload images if any
       const imageUrls: string[] = []
+<<<<<<< HEAD
       for (const file of mediaFiles) {
         const fileExt = file.name.split('.').pop()
         const fileName = `${Math.random()}${Date.now()}.${fileExt}`
@@ -132,6 +143,12 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
           .getPublicUrl(filePath)
 
         imageUrls.push(data.publicUrl)
+=======
+      if (mediaFiles.length > 0) {
+        toast({ title: 'Uploading images...' })
+        const urls = await UploadAPI.uploadMultipleMedia(mediaFiles, 'posts')
+        imageUrls.push(...urls)
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
       }
 
       // Create post

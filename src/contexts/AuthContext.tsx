@@ -1,8 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+<<<<<<< HEAD
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface Profile {
+=======
+import { useUser, useClerk, useSession } from '@clerk/clerk-react';
+
+export interface Profile {
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   id: string;
   username: string | null;
   full_name: string | null;
@@ -15,9 +21,15 @@ interface Profile {
 }
 
 interface AuthContextType {
+<<<<<<< HEAD
   user: User | null;
   profile: Profile | null;
   session: Session | null;
+=======
+  user: any | null; // Using any temporarily while we transition away from Supabase User type
+  profile: Profile | null;
+  session: any | null;
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   loading: boolean;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -28,6 +40,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+<<<<<<< HEAD
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -185,6 +198,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
 
     await loadProfile(user.id);
+=======
+  const [profile, setProfile] = useState<Profile | null>({
+    id: 'dev-user-id',
+    username: 'Developer',
+    full_name: 'Local Developer',
+    phone: null,
+    location: null,
+    language_preference: 'en',
+    avatar_url: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  
+  const signUp = async () => {};
+  const signIn = async () => {};
+  const signOut = async () => {};
+  const updateProfile = async () => {};
+
+  const user = {
+    id: 'dev-user-id',
+    email: 'dev@local.host',
+    metadata: {}
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
   };
 
   return (
@@ -192,8 +228,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         profile,
+<<<<<<< HEAD
         session,
         loading,
+=======
+        session: {},
+        loading: false,
+>>>>>>> 5b11f30 (Agri Compass - v2 Full-Stack Release (Decision Support System))
         signUp,
         signIn,
         signOut,
