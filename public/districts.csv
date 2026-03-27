@@ -1,0 +1,32 @@
+district,recommended_crops,soil_type,avg_rainfall,weather_pattern
+Bagalkot,Cotton / Sunflower / Pomegranate,Black Cotton,500mm,Arid
+Ballari,Paddy / Cotton / Sunflower,Red Sandy,600mm,Semi-arid
+Belagavi,Sugarcane / Cotton / Soybean,Black & Red,800mm,Semi-arid
+Bengaluru Rural,Ragi / Maize / Grapes,Red Loam,850mm,Semi-arid
+Bengaluru Urban,Ragi / Vegetables / Flowers,Red Loam,850mm,Semi-arid
+Bidar,Soybean / Pigeon Pea / Bengal Gram,Laterite & Black,800mm,Semi-arid
+Chamarajanagar,Sugarcane / Turmeric / Maize,Red Loam,750mm,Tropical
+Chikkaballapur,Maize / Ragi / Mango,Red Loamy,700mm,Semi-arid
+Chikkamagaluru,Coffee / Pepper / Arecanut,Laterite,1900mm,Tropical Monsoon
+Chitradurga,Groundnut / Onion / Cotton,Red & Black,550mm,Dry
+Dakshina Kannada,Paddy / Arecanut / Coconut,Laterite,3900mm,Tropical Monsoon
+Davanagere,Paddy / Maize / Cotton,Red Sandy,650mm,Semi-arid
+Dharwad,Cotton / Soybean / Wheat,Black Cotton,750mm,Semi-arid
+Gadag,Cotton / Onion / Chilli,Black Cotton,600mm,Dry
+Hassan,Coffee / Potato / Coconut,Red Loam,1000mm,Tropical
+Haveri,Maize / Cotton / Chilli,Black Cotton,750mm,Semi-arid
+Kalaburagi,Pigeon Pea / Bengal Gram / Sunflower,Black Cotton,700mm,Semi-arid
+Kodagu,Coffee / Pepper / Cardamom,Laterite,2700mm,Tropical Monsoon
+Kolar,Ragi / Tomato / Mango,Red Loam,700mm,Semi-arid
+Koppal,Paddy / Maize / Sunflower,Black & Red,550mm,Arid
+Mandya,Sugarcane / Paddy / Ragi,Red Sandy Loam,700mm,Semi-arid
+Mysuru,Paddy / Sugarcane / Tobacco,Red Loam,750mm,Tropical
+Raichur,Paddy / Cotton / Groundnut,Black Cotton,600mm,Arid
+Ramanagara,Ragi / Mango / Silk,Red Loam,800mm,Semi-arid
+Shivamogga,Paddy / Arecanut / Maize,Laterite,2100mm,Tropical Monsoon
+Tumakuru,Ragi / Groundnut / Coconut,Red Loam,650mm,Semi-arid
+Udupi,Paddy / Arecanut / Cashew,Laterite,4000mm,Tropical Monsoon
+Uttara Kannada,Arecanut / Spice / Paddy,Laterite,2800mm,Tropical Monsoon
+Vijayanagara,Paddy / Maize / Banana,Red Sandy,600mm,Semi-arid
+Vijayapura,Grapes / Pomegranate / Cotton,Black Cotton,550mm,Arid
+Yadgir,Paddy / Cotton / Groundnut,Black Cotton,650mm,Semi-arid
