@@ -58,7 +58,12 @@ public class AiController {
         }
         
         if (aiResponseText == null) {
-            aiResponseText = "Sorry, all our AI brains are currently exhausted. Please try again later or verify your API keys.";
+            aiResponseText = "Namaste! I'm KrishiMitra, your AI farming assistant. " +
+                "I'm currently in offline mode (API keys not configured), but I can still offer general advice: " +
+                "1. For Karnataka's current season, ensure proper soil testing before sowing. " +
+                "2. Monitor your crops for early signs of pests like Fall Armyworm in Maize. " +
+                "3. Check the 'Weather' and 'Market Prices' tabs for the latest local data. " +
+                "How else can I help you today?";
         }
 
         return ResponseEntity.ok(Map.of(
